@@ -3,39 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Details</title>
+    <title>Academic Pulse: Attendance Details</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1>Attendance for <span id="displayDate"></span></h1>
-        <div id="attendanceTableContainer">
-            <table id="attendanceTable">
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Student Name</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
+<body class="light-mode">
+    <header class="sub-header">
+        <h1 class="sub-header-title">Attendance Details for <span id="displayDate"></span></h1>
+        <p class="sub-header-description">Review the attendance status for all students recorded on this date.</p>
+    </header>
+
+    <main class="container">
+        <section class="summary-section">
+            <h2 class="section-title">Attendance Overview</h2>
+            <div class="summary-grid">
+                <div class="summary-card present-card">
+                    <h3><i class="fas fa-check-circle"></i> Present</h3>
+                    <p id="presentCount" class="summary-count">0</p>
+                </div>
+                <div class="summary-card absent-card">
+                    <h3><i class="fas fa-times-circle"></i> Absent</h3>
+                    <p id="absentCount" class="summary-count">0</p>
+                </div>
+                <div class="summary-card na-card">
+                    <h3><i class="fas fa-question-circle"></i> Not Recorded</h3>
+                    <p id="naCount" class="summary-count">0</p>
+                </div>
+                <div class="summary-card total-card">
+                    <h3><i class="fas fa-users"></i> Total Students</h3>
+                    <p id="totalStudentsCount" class="summary-count">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-control-section">
+            <h2 class="section-title">Student Records</h2>
+            <div class="input-group">
+                <input type="text" id="studentSearchInput" placeholder="Search student name or class..." class="filter-input">
+                <button id="clearSearchBtn" class="filter-button"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <p class="input-description">Filter the table by student name or class to find specific records quickly.</p>
+        </section>
+
+        <section class="attendance-table-section">
+            <div id="loadingIndicator" class="loading-spinner" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading attendance...
+            </div>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="attendanceTableContainer" class="table-responsive">
+                <table id="attendanceTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="3" class="no-data-row">No attendance records found for this date.</td></tr>
                     </tbody>
-            </table>
-        </div>
-        <div class="back-to-home">
-            <a href="students.html" class="section-button">
+                </table>
+            </div>
+            <p class="section-description" id="studentCountInfo">
+                </p>
+        </section>
+
+        <nav class="navigation-buttons">
+            <a href="students.html" class="section-button nav-button">
                 <i class="fas fa-calendar-alt icon"></i>
-                <span>Back to Dates</span>
+                <span>Back to All Dates</span>
             </a>
-            <a href="index.html" class="section-button">
+            <a href="index.html" class="section-button nav-button">
                 <i class="fas fa-home icon"></i>
                 <span>Back to Home</span>
             </a>
-        </div>
-    </div>
+        </nav>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; <span id="currentYearFooter"></span> Academic Pulse. All rights reserved.</p>
+    </footer>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
-    <script src="js/attendance-detail.js"></script> </body>
+    <script src="js/attendance-detail.js"></script>
+    <script>
+        // Script for footer year (if not already handled by index.html script)
+        document.getElementById('currentYearFooter').textContent = new Date().getFullYear();
+
+        // Apply theme preference loaded from index.html (or default)
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = localStorage.getItem('theme') || 'light-mode';
+            document.body.classList.add(currentTheme);
+        });
+    </script>
+</body>
 </html>
