@@ -3,64 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Pulse: Browse Attendance Dates</title>
+    <title>Student Portal - View Attendance</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Student portal to view class-specific attendance records.">
+    <meta name="keywords" content="student, attendance, class, view, school">
 </head>
-<body class="light-mode">
-    <header class="sub-header">
-        <h1 class="sub-header-title">Browse Attendance Records by Date</h1>
-        <p class="sub-header-description">Select a date below to view detailed attendance for all students.</p>
-    </header>
+<body>
+    <div class="container student-container">
+        <header class="portal-header">
+            <h1>Student Portal</h1>
+            <p class="sub-heading">Select your class to view attendance records.</p>
+        </header>
 
-    <main class="container">
-        <section class="date-filter-section">
-            <h2 class="section-title">Find Specific Dates</h2>
-            <div class="input-group">
-                <input type="text" id="dateFilterInput" placeholder="Filter dates (e.g., 2023-10-26)" class="filter-input">
-                <button id="clearFilterBtn" class="filter-button"><i class="fas fa-times"></i> Clear</button>
+        <section class="class-selection-section">
+            <h2>Select Your Class</h2>
+            <div class="class-selection" id="studentClassSelection">
+                <button class="class-button" data-class="S.1">S.1</button>
+                <button class="class-button" data-class="S.2">S.2</button>
+                <button class="class-button" data-class="S.3">S.3</button>
+                <button class="class-button" data-class="S.4">S.4</button>
+                <button class="class-button" data-class="S.5">S.5</button>
+                <button class="class-button" data-class="S.6">S.6</button>
             </div>
-            <p class="input-description">Enter a date to quickly narrow down the list of available attendance records.</p>
         </section>
 
-        <section class="dates-list-section">
-            <h2 class="section-title">Available Attendance Dates</h2>
-            <div id="loadingIndicator" class="loading-spinner" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Loading dates...
-            </div>
-            <div id="errorMessage" class="error-message" style="display: none;"></div>
-            <div id="datesList" class="class-selection grid-layout">
-                <p>No attendance dates available yet. Please check back later or contact administration.</p>
-            </div>
-            <p class="section-description" id="dateCountInfo">
-                </p>
+        <section id="dateSelection" class="date-selection-section" style="display: none;">
+            <h2>Select a Date for <span id="selectedClassStudentHeader"></span></h2>
+            <input type="date" id="attendanceDateStudent" class="date-input">
+            <button id="viewAttendanceBtn" class="action-button primary-button">View Attendance</button>
         </section>
 
-        <nav class="navigation-buttons">
-            <a href="index.html" class="section-button nav-button">
+        <section id="attendanceTableContainer" class="attendance-table-section" style="display: none;">
+            <h2>Attendance for <span id="selectedClassStudent"></span> on <span id="selectedDateStudent"></span></h2>
+            <div class="table-responsive">
+                <table id="attendanceTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+            <p class="info-text">Attendance data is updated by school monitors daily.</p>
+        </section>
+
+        <div class="navigation-buttons">
+            <a href="index.html" class="section-button small-button">
                 <i class="fas fa-home icon"></i>
                 <span>Back to Home</span>
             </a>
-        </nav>
-    </main>
-
-    <footer class="main-footer">
-        <p>&copy; <span id="currentYearFooter"></span> Academic Pulse. All rights reserved.</p>
-    </footer>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/students.js"></script>
-    <script>
-        // Script for footer year (if not already handled by index.html script)
-        document.getElementById('currentYearFooter').textContent = new Date().getFullYear();
-
-        // Apply theme preference loaded from index.html (or default)
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentTheme = localStorage.getItem('theme') || 'light-mode';
-            document.body.classList.add(currentTheme);
-        });
-    </script>
 </body>
 </html>
