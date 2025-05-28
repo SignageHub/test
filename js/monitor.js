@@ -1,4 +1,9 @@
 // js/monitor.js
+let monitorSelectedClass = '';
+let monitorSelectedDate = '';
+let currentStudents = []; // To store students loaded for the current class
+let currentAttendance = {}; // To store attendance status for the current date
+
 document.addEventListener('DOMContentLoaded', () => {
     const classButtonsMonitor = document.querySelectorAll('#monitorClassSelection .class-button-monitor');
     const monitorDateSelectionDiv = document.getElementById('monitorDateSelection');
@@ -12,63 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addNewStudentBtn = document.getElementById('addNewStudentBtn');
     const addStudentClassSpan = document.getElementById('addStudentClass');
     const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
-    const selectedClassInfo = document.getElementById('selectedClassInfo');
 
-    const managementLoadingIndicator = document.getElementById('managementLoadingIndicator');
-    const managementErrorMessage = document.getElementById('managementErrorMessage');
-
+    // Reference to the global db object. Authentication is not used here.
     const db = window.db;
-
-    let monitorSelectedClass = '';
-    let monitorSelectedDate = '';
-    let currentStudents = []; // To store students loaded for the current class
-    let currentAttendance = {}; // To store attendance status for the current date
-
-    // Helper functions for UI feedback (toasts)
-    function showToast(message, type) {
-        const toast = document.createElement('div');
-        toast.classList.add(type === 'success' ? 'success-toast' : 'error-toast');
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 10); // Small delay to trigger transition
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            toast.addEventListener('transitionend', () => toast.remove());
-        }, 3000); // Hide after 3 seconds
-    }
-
-    // Helper functions for section loading/error
-    function showManagementLoading() {
-        managementLoadingIndicator.style.display = 'block';
-        monitorAttendanceTableBody.innerHTML = '';
-        managementErrorMessage.style.display = 'none';
-    }
-
-    function hideManagementLoading() {
-        managementLoadingIndicator.style.display = 'none';
-    }
-
-    function displayManagementError(message) {
-        managementErrorMessage.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${message}`;
-        managementErrorMessage.style.display = 'flex';
-    }
-
-    function hideManagementError() {
-        managementErrorMessage.style.display = 'none';
-        managementErrorMessage.textContent = '';
-    }
-
-    // Set default date to today
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const dd = String(today.getDate()).padStart(2, '0');
-    attendanceDateMonitorInput.value = `${yyyy}-${mm}-${dd}`;
-
 
     // --- Class Selection ---
     classButtonsMonitor.forEach(button => {
@@ -77,14 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.add('selected');
 
             monitorSelectedClass = button.dataset.class;
-            selectedClassInfo.textContent = `Selected Class: ${monitorSelectedClass}`;
             addStudentClassSpan.textContent = monitorSelectedClass; // Update add student section
-            monitorDateSelectionDiv.style.display = 'flex'; // Show date selection
+            monitorDateSelectionDiv.style.display = 'block'; // Show date selection
             monitorAttendanceManagementDiv.style.display = 'none'; // Hide management table
-            monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2" class="no-data-row">Select a date and click "Load Students" to manage attendance.</td></tr>';
+            monitorAttendanceTableBody.innerHTML = ''; // Clear previous table data
             currentStudents = []; // Clear loaded students
             currentAttendance = {}; // Clear attendance records
-            hideManagementError();
+            attendanceDateMonitorInput.value = ''; // Clear date input for new class selection
+            console.log(`Monitor selected class: ${monitorSelectedClass}`);
         });
     });
 
@@ -93,24 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
         monitorSelectedDate = attendanceDateMonitorInput.value;
 
         if (!monitorSelectedClass) {
-            showToast('Please select a class first.', 'error');
+            alert('Please select a class first.');
             return;
         }
         if (!monitorSelectedDate) {
-            showToast('Please select a date.', 'error');
+            alert('Please select a date.');
             return;
         }
 
         monitorSelectedClassSpan.textContent = monitorSelectedClass;
         monitorSelectedDateSpan.textContent = monitorSelectedDate;
         monitorAttendanceManagementDiv.style.display = 'block'; // Show management table
+        console.log(`Monitor loading students for Class: ${monitorSelectedClass}, Date: ${monitorSelectedDate}`);
 
         await loadStudentsAndAttendanceForMonitor();
     });
 
     async function loadStudentsAndAttendanceForMonitor() {
-        showManagementLoading();
-        hideManagementError();
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2"><i class="fas fa-spinner fa-spin"></i> Loading students and attendance...</td></tr>';
         currentStudents = [];
         currentAttendance = {};
 
@@ -119,10 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const classDocRef = db.collection('classes').doc(monitorSelectedClass);
             const classDoc = await classDocRef.get();
 
-            if (classDoc.exists && classDoc.data().students && classDoc.data().students.length > 0) {
+            if (classDoc.exists && classDoc.data().students) {
                 currentStudents = classDoc.data().students;
+                console.log(`Students in ${monitorSelectedClass}:`, currentStudents);
             } else {
-                console.log(`No students found for class ${monitorSelectedClass} yet. User will need to add them.`);
+                console.log(`No students found for class ${monitorSelectedClass} yet.`);
+                alert(`No students found for class ${monitorSelectedClass}. You can add them below.`);
             }
 
             // 2. Fetch existing attendance for the selected class and date
@@ -132,13 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (attendanceDoc.exists && attendanceDoc.data().records) {
                 currentAttendance = attendanceDoc.data().records;
+                console.log(`Existing attendance for ${attendanceDocId}:`, currentAttendance);
+            } else {
+                console.log(`No existing attendance for ${attendanceDocId}. Starting fresh.`);
             }
 
-            // 3. Populate the table
             monitorAttendanceTableBody.innerHTML = ''; // Clear loading message
 
+            // 3. Populate the table
             if (currentStudents.length === 0) {
-                monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2" class="no-data-row">No students added to this class yet. Use "Add New Student" below.</td></tr>';
+                monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2">No students added to this class yet. Use "Add New Student" below.</td></tr>';
             } else {
                 currentStudents.sort((a, b) => a.localeCompare(b)); // Sort students alphabetically
 
@@ -151,13 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const currentStatus = currentAttendance[studentName] || 'absent'; // Default to absent if no record
 
-                    statusCell.innerHTML = `
-                        <div class="monitor-attendance-status">
-                            <input type="radio" id="present-${sanitizedId(studentName)}" name="status-${sanitizedId(studentName)}" value="present" ${currentStatus === 'present' ? 'checked' : ''}>
-                            <label for="present-${sanitizedId(studentName)}"><i class="fas fa-check"></i> Present</label>
+                    // Sanitize student name for HTML IDs (remove spaces, dots, etc.)
+                    const sanitizedStudentName = studentName.replace(/[^a-zA-Z0-9]/g, '_');
 
-                            <input type="radio" id="absent-${sanitizedId(studentName)}" name="status-${sanitizedId(studentName)}" value="absent" ${currentStatus === 'absent' ? 'checked' : ''}>
-                            <label for="absent-${sanitizedId(studentName)}"><i class="fas fa-times"></i> Absent</label>
+                    statusCell.innerHTML = `
+                        <div class="monitor-attendance-status" role="radiogroup" aria-label="Attendance status for ${studentName}">
+                            <input type="radio" id="present-${sanitizedStudentName}" name="status-${sanitizedStudentName}" value="present" ${currentStatus === 'present' ? 'checked' : ''} aria-checked="${currentStatus === 'present'}">
+                            <label for="present-${sanitizedStudentName}">Present (<i class="fas fa-check"></i>)</label>
+
+                            <input type="radio" id="absent-${sanitizedStudentName}" name="status-${sanitizedStudentName}" value="absent" ${currentStatus === 'absent' ? 'checked' : ''} aria-checked="${currentStatus === 'absent'}">
+                            <label for="absent-${sanitizedStudentName}">Absent (<i class="fas fa-times"></i>)</label>
                         </div>
                     `;
                 });
@@ -165,16 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Error loading students and attendance:", error);
-            displayManagementError(`Failed to load data. ${error.message}. Please try again.`);
-            monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2" class="no-data-row" style="color:red;">Error loading data.</td></tr>';
-        } finally {
-            hideManagementLoading();
+            monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2" style="color: red;">Error loading data. Please try again or check console.</td></tr>';
         }
-    }
-
-    // Function to sanitize student names for HTML IDs
-    function sanitizedId(name) {
-        return name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
     }
 
     // --- Add New Student ---
@@ -182,59 +133,57 @@ document.addEventListener('DOMContentLoaded', () => {
         const newStudentName = newStudentNameInput.value.trim();
 
         if (!monitorSelectedClass) {
-            showToast('Please select a class before adding a student.', 'error');
+            alert('Please select a class before adding a student.');
             return;
         }
 
         if (newStudentName === '') {
-            showToast('Please enter a student name.', 'error');
+            alert('Please enter a student name.');
             return;
         }
 
+        // Check for existing student (case-insensitive)
         if (currentStudents.some(student => student.toLowerCase() === newStudentName.toLowerCase())) {
-            showToast(`Student "${newStudentName}" already exists in ${monitorSelectedClass}.`, 'warning');
-            return;
-        }
-
-        // Basic input validation
-        if (!/^[a-zA-Z\s.-]+$/.test(newStudentName)) {
-            showToast('Student name can only contain letters, spaces, dots, or hyphens.', 'error');
+            alert(`Student "${newStudentName}" already exists in ${monitorSelectedClass}.`);
+            newStudentNameInput.value = ''; // Clear input even if exists
             return;
         }
 
         try {
             const classDocRef = db.collection('classes').doc(monitorSelectedClass);
 
+            // Use arrayUnion to add new student name to the 'students' array
             await classDocRef.set({
                 students: firebase.firestore.FieldValue.arrayUnion(newStudentName)
-            }, { merge: true });
+            }, { merge: true }); // Use merge: true to avoid overwriting other fields
 
-            newStudentNameInput.value = ''; // Clear input
-            showToast(`Student "${newStudentName}" added to ${monitorSelectedClass} successfully!`, 'success');
+            newStudentNameInput.value = ''; // Clear input field
+            console.log(`Student "${newStudentName}" added to ${monitorSelectedClass}.`);
+            alert(`Student "${newStudentName}" added to ${monitorSelectedClass}.`);
 
-            // Reload students to update the table immediately
+            // Reload students and attendance to show the newly added student
             await loadStudentsAndAttendanceForMonitor();
 
         } catch (error) {
             console.error("Error adding new student:", error);
-            showToast(`Error adding student. ${error.message}`, 'error');
+            alert("Error adding student. Please try again.");
         }
     });
 
     // --- Save Attendance ---
     saveAttendanceBtn.addEventListener('click', async () => {
-        if (!monitorSelectedClass || !monitorSelectedDate || currentStudents.length === 0) {
-            showToast('Please load students and set attendance before saving.', 'error');
+        if (!monitorSelectedClass || !monitorSelectedDate) {
+            alert('Please select a class and date, and load students before saving attendance.');
             return;
         }
-
-        if (!confirm('Are you sure you want to save attendance for this date? This will overwrite previous records for today.')) {
-            return; // User cancelled
+        if (currentStudents.length === 0) {
+            alert('No students loaded to save attendance for. Add students first.');
+            return;
         }
 
         const attendanceRecords = {};
         currentStudents.forEach(studentName => {
-            const sanitizedStudentName = sanitizedId(studentName);
+            const sanitizedStudentName = studentName.replace(/[^a-zA-Z0-9]/g, '_'); // Re-sanitize name for radio button name attribute
             const radioButtons = document.getElementsByName(`status-${sanitizedStudentName}`);
             for (const radio of radioButtons) {
                 if (radio.checked) {
@@ -248,31 +197,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const attendanceDocRef = db.collection('attendance').doc(attendanceDocId);
 
         try {
-            await db.runTransaction(async (transaction) => {
-                const doc = await transaction.get(attendanceDocRef);
-                if (!doc.exists) {
-                    transaction.set(attendanceDocRef, {
-                        class: monitorSelectedClass,
-                        date: monitorSelectedDate,
-                        records: attendanceRecords,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } else {
-                    // Merge new records with existing ones, preserving other fields if any
-                    transaction.update(attendanceDocRef, {
-                        records: attendanceRecords,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            });
+            await attendanceDocRef.set({
+                class: monitorSelectedClass,
+                date: monitorSelectedDate,
+                records: attendanceRecords,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Add a server timestamp
+            }, { merge: true }); // Use merge: true to avoid overwriting the entire document if other fields exist
 
-            showToast('Attendance saved successfully!', 'success');
-            // Optionally, you might want to reload to reflect saved state
-            await loadStudentsAndAttendanceForMonitor();
+            alert('Attendance saved successfully!');
+            console.log(`Attendance saved for ${attendanceDocId}:`, attendanceRecords);
 
         } catch (error) {
             console.error("Error saving attendance:", error);
-            showToast(`Error saving attendance. ${error.message}`, 'error');
+            alert("Error saving attendance. Please try again.");
         }
     });
 });
