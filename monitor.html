@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Monitor Attendance</h1>
+        <p>Logged in as: <span id="monitorEmail"></span> | <button id="logoutBtn">Logout</button></p>
+
+        <div class="class-selection" id="monitorClassSelection">
+            <h2>Select Class</h2>
+            <button class="class-button-monitor" data-class="S.1">S.1</button>
+            <button class="class-button-monitor" data-class="S.2">S.2</button>
+            <button class="class-button-monitor" data-class="S.3">S.3</button>
+            <button class="class-button-monitor" data-class="S.4">S.4</button>
+            <button class="class-button-monitor" data-class="S.5">S.5</button>
+            <button class="class-button-monitor" data-class="S.6">S.6</button>
+        </div>
+
+        <div id="monitorDateSelection" style="display: none;">
+            <h2>Select Date</h2>
+            <input type="date" id="attendanceDateMonitor">
+            <button id="loadStudentsBtn">Load Students</button>
+        </div>
+
+        <div id="monitorAttendanceManagement" style="display: none;">
+            <h2>Manage Attendance for <span id="monitorSelectedClass"></span> on <span id="monitorSelectedDate"></span></h2>
+            <table id="monitorAttendanceTable">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Present (✓) / Absent (X)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+
+            <div class="add-student-section">
+                <h3>Add New Student to <span id="addStudentClass"></span></h3>
+                <input type="text" id="newStudentName" placeholder="Enter student name" required>
+                <button id="addNewStudentBtn">Add Student</button>
+            </div>
+
+            <button id="saveAttendanceBtn">Save Attendance</button>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/monitor.js"></script>
+</body>
+</html>
