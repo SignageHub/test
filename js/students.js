@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedClassSpan = document.getElementById('selectedClassStudent');
     const selectedDateSpan = document.getElementById('selectedDateStudent');
 
+    // Reference to the global db object
+    const db = window.db;
+
     classButtons.forEach(button => {
         button.addEventListener('click', () => {
             // Remove 'selected' class from all buttons
@@ -30,10 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     viewAttendanceBtn.addEventListener('click', async () => {
         selectedDate = attendanceDateInput.value;
 
-        if (!selectedClass || !selectedDate) {
-            alert('Please select a class and a date.');
+        if (!selectedClass) {
+            alert('Please select a class first.');
             return;
         }
+        if (!selectedDate) {
+             alert('Please select a date.');
+             return;
+        }
+
 
         selectedClassSpan.textContent = selectedClass;
         selectedDateSpan.textContent = selectedDate;
@@ -43,25 +51,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadStudentAttendance() {
-        attendanceTableBody.innerHTML = ''; // Clear existing rows
+        attendanceTableBody.innerHTML = '<tr><td colspan="2">Loading attendance...</td></tr>'; // Loading message
 
         try {
             // Fetch students for the selected class
             const classDocRef = db.collection('classes').doc(selectedClass);
             const classDoc = await classDocRef.get();
 
-            if (!classDoc.exists || !classDoc.data().students) {
-                attendanceTableBody.innerHTML = '<tr><td colspan="2">No students found for this class or no attendance data for this date.</td></tr>';
+            let students = [];
+            if (classDoc.exists && classDoc.data().students) {
+                students = classDoc.data().students; // Array of student names
+            } else {
+                attendanceTableBody.innerHTML = '<tr><td colspan="2">No students found for this class.</td></tr>';
                 return;
             }
-
-            const students = classDoc.data().students; // Array of student names
 
             // Fetch attendance for the selected class and date
             const attendanceDocId = `${selectedClass}_${selectedDate}`; // e.g., S.1_2023-10-26
             const attendanceDocRef = db.collection('attendance').doc(attendanceDocId);
             const attendanceDoc = await attendanceDocRef.get();
             const attendanceData = attendanceDoc.exists ? attendanceDoc.data().records : {};
+
+            attendanceTableBody.innerHTML = ''; // Clear loading message
+
+            if (students.length === 0) {
+                 attendanceTableBody.innerHTML = '<tr><td colspan="2">No students added to this class yet.</td></tr>';
+                 return;
+            }
+
+            students.sort((a, b) => a.localeCompare(b)); // Sort students alphabetically
 
             students.forEach(studentName => {
                 const row = attendanceTableBody.insertRow();
@@ -82,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Error loading student attendance:", error);
-            attendanceTableBody.innerHTML = '<tr><td colspan="2">Error loading attendance data.</td></tr>';
+            attendanceTableBody.innerHTML = '<tr><td colspan="2">Error loading attendance data. Please check console.</td></tr>';
         }
     }
 });
