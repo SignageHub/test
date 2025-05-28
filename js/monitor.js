@@ -6,8 +6,6 @@ let currentStudents = []; // To store students loaded for the current class
 let currentAttendance = {}; // To store attendance status for the current date
 
 document.addEventListener('DOMContentLoaded', () => {
-    const monitorEmailSpan = document.getElementById('monitorEmail');
-    const logoutBtn = document.getElementById('logoutBtn');
     const classButtonsMonitor = document.querySelectorAll('#monitorClassSelection .class-button-monitor');
     const monitorDateSelectionDiv = document.getElementById('monitorDateSelection');
     const attendanceDateMonitorInput = document.getElementById('attendanceDateMonitor');
@@ -21,29 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const addStudentClassSpan = document.getElementById('addStudentClass');
     const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
 
-    // Reference to the global auth and db objects
-    const auth = window.auth;
+    // Reference to the global db object. Authentication is not used here.
     const db = window.db;
-
-    // --- Authentication Check ---
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            monitorEmailSpan.textContent = user.email;
-        } else {
-            // Not logged in, redirect to login page
-            window.location.href = 'login.html';
-        }
-    });
-
-    logoutBtn.addEventListener('click', async () => {
-        try {
-            await auth.signOut();
-            window.location.href = 'login.html'; // Redirect to login page after logout
-        } catch (error) {
-            console.error("Logout error:", error);
-            alert("Error logging out.");
-        }
-    });
 
     // --- Class Selection ---
     classButtonsMonitor.forEach(button => {
@@ -74,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-
         monitorSelectedClassSpan.textContent = monitorSelectedClass;
         monitorSelectedDateSpan.textContent = monitorSelectedDate;
         monitorAttendanceManagementDiv.style.display = 'block'; // Show management table
@@ -83,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadStudentsAndAttendanceForMonitor() {
-        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2">Loading students and attendance...</td></tr>'; // Loading message
-        currentStudents = []; // Reset students array
-        currentAttendance = {}; // Reset attendance object
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="2">Loading students and attendance...</td></tr>';
+        currentStudents = [];
+        currentAttendance = {};
 
         try {
             // 1. Fetch students for the selected class
@@ -156,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Check for duplicates (case-insensitive)
         if (currentStudents.some(student => student.toLowerCase() === newStudentName.toLowerCase())) {
             alert(`Student "${newStudentName}" already exists in ${monitorSelectedClass}.`);
             return;
@@ -165,14 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const classDocRef = db.collection('classes').doc(monitorSelectedClass);
 
-            // Add the new student to the array in the 'students' field
             await classDocRef.set({
                 students: firebase.firestore.FieldValue.arrayUnion(newStudentName)
-            }, { merge: true }); // Use merge: true to avoid overwriting other fields
+            }, { merge: true });
 
-            newStudentNameInput.value = ''; // Clear input
+            newStudentNameInput.value = '';
 
-            // Refresh the table to show the new student
             await loadStudentsAndAttendanceForMonitor();
             alert(`Student "${newStudentName}" added to ${monitorSelectedClass}.`);
 
@@ -191,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const attendanceRecords = {};
         currentStudents.forEach(studentName => {
-            // Replace spaces and dots for consistent ID/name attribute in HTML radios
             const sanitizedStudentName = studentName.replace(/[\s\.]/g, '_');
             const radioButtons = document.getElementsByName(`status-${sanitizedStudentName}`);
             for (const radio of radioButtons) {
@@ -210,12 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 class: monitorSelectedClass,
                 date: monitorSelectedDate,
                 records: attendanceRecords,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp() // To record when it was last saved
-            }, { merge: true }); // Merge ensures other fields (if any) are not overwritten
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
 
             alert('Attendance saved successfully!');
-            // Optionally, reload to confirm saved state or provide visual feedback
-            // await loadStudentsAndAttendanceForMonitor(); // Can uncomment if you want an immediate reload
 
         } catch (error) {
             console.error("Error saving attendance:", error);
