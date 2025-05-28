@@ -1,14 +1,164 @@
+:root {
+    --primary-blue: #007bff;
+    --primary-red: #dc3545;
+    --btn-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #eef2f7;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    background-color: #f9f9f9; /* Lighter background from new design */
+    display: flex; /* Adjusting for header */
+    flex-direction: column; /* Allows content to flow vertically after header */
     min-height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
     color: #333;
+}
+
+header {
+    background: linear-gradient(90deg, var(--primary-red), var(--primary-blue));
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 20; /* Ensure header is on top */
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-logo {
+    height: 80px; /* Adjust height as needed for your logo */
+    width: auto;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+.brand-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.header-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.6rem 1.4rem;
+    border: none;
+    border-radius: var(--btn-radius);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-login {
+    background-color: var(--primary-red);
+    color: white;
+}
+
+.btn-register {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #b02a37;
+}
+
+.btn-register:hover {
+    background-color: #0056b3;
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.dropdown-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease forwards;
+    z-index: 10;
+    width: 100%; /* Make dropdown full width on mobile */
+}
+
+.dropdown-panel a {
+    margin: 0.5rem 0;
+    width: 90%;
+    text-align: center;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-buttons {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .dropdown-panel.show {
+        display: flex;
+    }
+
+    .brand-title {
+        font-size: 1.8rem; /* Adjust title size for smaller screens */
+    }
+    .header-logo {
+        height: 60px; /* Adjust logo size for smaller screens */
+    }
+}
+
+main {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    flex-grow: 1; /* Allow main content to take remaining height */
+    justify-content: center; /* Center content vertically */
 }
 
 .container {
@@ -20,6 +170,7 @@ body {
     width: 100%;
     max-width: 900px;
     box-sizing: border-box;
+    /* Removed margin-top/bottom and min-height as 'main' now handles centering */
 }
 
 h1, h2, h3 {
@@ -28,41 +179,46 @@ h1, h2, h3 {
     font-weight: 600;
 }
 
-.main-sections {
+.dashboard-buttons { /* Used for index.html's main buttons */
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 30px;
-    margin-top: 50px;
+    gap: 1rem;
 }
 
-.section-button {
-    text-decoration: none;
-    color: #333;
-    background-color: #f0f4f8;
-    padding: 35px 50px;
-    border-radius: 15px;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
+.dashboard-buttons button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: var(--btn-radius);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    color: white;
+    display: inline-flex;
     align-items: center;
+    gap: 0.5rem;
+    min-width: 150px; /* Ensure buttons have a minimum width */
     justify-content: center;
-    font-size: 1.3em;
-    font-weight: bold;
-    min-width: 220px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.section-button:hover {
-    background-color: #e0e7ed;
-    transform: translateY(-7px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+.btn-success {
+    background-color: #28a745;
 }
 
-.section-button .icon {
-    font-size: 3.5em;
-    margin-bottom: 18px;
-    color: #3498db;
+.btn-success:hover {
+    background-color: #218838;
 }
+
+.btn-primary {
+    background-color: var(--primary-blue);
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+
+/* Your existing attendance system styles, adapted for the new base */
 
 /* Class selection buttons */
 .class-selection {
@@ -79,10 +235,10 @@ h1, h2, h3 {
     color: white;
     padding: 14px 28px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--btn-radius); /* Using the global var */
     cursor: pointer;
     font-size: 1.15em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: var(--transition); /* Using the global var */
     min-width: 90px;
 }
 
@@ -102,7 +258,7 @@ h1, h2, h3 {
     margin-bottom: 25px;
     padding: 20px;
     background-color: #f9f9f9;
-    border-radius: 8px;
+    border-radius: var(--btn-radius); /* Using the global var */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -119,7 +275,8 @@ input[type="date"], input[type="text"], input[type="email"], input[type="passwor
     box-sizing: border-box;
 }
 
-button {
+/* General button styles for non-dashboard buttons */
+.container button:not(.btn) { /* Exclude buttons with class .btn from this rule */
     background-color: #007bff;
     color: white;
     padding: 12px 25px;
@@ -130,9 +287,10 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
+.container button:not(.btn):hover {
     background-color: #0056b3;
 }
+
 
 #viewAttendanceBtn, #loadStudentsBtn, #saveAttendanceBtn, #addNewStudentBtn {
     background-color: #2ecc71; /* Green for action buttons */
@@ -152,7 +310,7 @@ table {
     margin-top: 30px;
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
+    border-radius: var(--btn-radius); /* Using the global var */
     overflow: hidden;
 }
 
@@ -229,7 +387,7 @@ tr:nth-child(even) {
     margin-top: 30px;
     padding: 20px;
     background-color: #e8f5e9; /* Light green background */
-    border-radius: 8px;
+    border-radius: var(--btn-radius); /* Using the global var */
     text-align: left;
     display: flex;
     flex-direction: column;
