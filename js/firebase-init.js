@@ -1,5 +1,4 @@
 // js/firebase-init.js
-
 // Your web app's Firebase configuration (provided by you)
 const firebaseConfig = {
     apiKey: "AIzaSyBORErIHguWArjbF9irs3lzYjL074G6PRM",
@@ -14,7 +13,8 @@ const firebaseConfig = {
 
 // Initialize Firebase and make the db object globally accessible
 // Authentication related initialization (firebase.auth()) has been removed
-window.firebaseApp = firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { // Prevent re-initialization if already initialized
+    window.firebaseApp = firebase.initializeApp(firebaseConfig);
+}
 window.db = firebase.firestore(); // Cloud Firestore instance
-
-console.log("Firebase initialized!");
+console.log("Firebase initialized and Firestore instance available as window.db!");
