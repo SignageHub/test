@@ -6,26 +6,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginBtn = document.getElementById('loginBtn');
     const errorMessage = document.getElementById('errorMessage');
 
-    loginBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        errorMessage.textContent = ''; // Clear previous error
+    // Reference to the global auth object
+    const auth = window.auth;
 
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            // On successful login, redirect to monitor.html
-            window.location.href = 'monitor.html';
-        } catch (error) {
-            errorMessage.textContent = `Login failed: ${error.message}`;
-            console.error("Login error:", error);
-        }
-    });
-
-    // Optional: Auto-redirect if already logged in (for monitor)
+    // Check if user is already logged in (e.g., if they revisit login.html)
     auth.onAuthStateChanged(user => {
         if (user) {
             // User is logged in, redirect to monitor.html
             window.location.href = 'monitor.html';
+        }
+    });
+
+    loginBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // Prevent default form submission if this were a form
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        errorMessage.textContent = ''; // Clear previous error
+
+        if (!email || !password) {
+            errorMessage.textContent = 'Please enter both email and password.';
+            return;
+        }
+
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            // On successful login, onAuthStateChanged listener will handle redirection
+        } catch (error) {
+            errorMessage.textContent = `Login failed: ${error.message}`;
+            console.error("Login error:", error);
         }
     });
 });
