@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Pulse: Monitor Portal</title>
+    <title>Monitor Portal - Manage Attendance</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Monitor dashboard for managing and updating student attendance records.">
+    <meta name="keywords" content="monitor, attendance, management, school, classes, students">
 </head>
-<body class="light-mode">
-    <header class="sub-header">
-        <h1 class="sub-header-title">Monitor Attendance Management</h1>
-        <p class="sub-header-description">Staff portal for recording and managing student attendance records.</p>
-    </header>
+<body>
+    <div class="container monitor-container">
+        <header class="portal-header">
+            <h1>Monitor Attendance</h1>
+            <p class="sub-heading">Select a class and date to manage attendance.</p>
+        </header>
 
-    <main class="container">
         <section class="class-selection-section">
-            <h2 class="section-title">1. Select a Class</h2>
-            <div id="monitorClassSelection" class="class-selection grid-layout">
+            <h2>Select Class</h2>
+            <div class="class-selection" id="monitorClassSelection">
                 <button class="class-button-monitor" data-class="S.1">S.1</button>
                 <button class="class-button-monitor" data-class="S.2">S.2</button>
                 <button class="class-button-monitor" data-class="S.3">S.3</button>
@@ -24,27 +26,16 @@
                 <button class="class-button-monitor" data-class="S.5">S.5</button>
                 <button class="class-button-monitor" data-class="S.6">S.6</button>
             </div>
-            <p class="section-description" id="selectedClassInfo">No class selected.</p>
         </section>
 
         <section id="monitorDateSelection" class="date-selection-section" style="display: none;">
-            <h2 class="section-title">2. Select Date & Load Students</h2>
-            <div class="input-group-vertical">
-                <label for="attendanceDateMonitor">Attendance Date:</label>
-                <input type="date" id="attendanceDateMonitor" class="form-input">
-                <button id="loadStudentsBtn" class="action-button primary-button"><i class="fas fa-users"></i> Load Students</button>
-            </div>
-            <p class="section-description">Choose the date for which you want to manage attendance.</p>
+            <h2>Select Date</h2>
+            <input type="date" id="attendanceDateMonitor" class="date-input">
+            <button id="loadStudentsBtn" class="action-button primary-button">Load Students</button>
         </section>
 
         <section id="monitorAttendanceManagement" class="attendance-management-section" style="display: none;">
-            <h2 class="section-title">3. Manage Attendance for <span id="monitorSelectedClass"></span> on <span id="monitorSelectedDate"></span></h2>
-
-            <div id="managementLoadingIndicator" class="loading-spinner" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Loading data...
-            </div>
-            <div id="managementErrorMessage" class="error-message" style="display: none;"></div>
-
+            <h2>Manage Attendance for <span id="monitorSelectedClass"></span> on <span id="monitorSelectedDate"></span></h2>
             <div class="table-responsive">
                 <table id="monitorAttendanceTable" class="data-table">
                     <thead>
@@ -54,46 +45,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td colspan="2" class="no-data-row">No students loaded. Select a class and date.</td></tr>
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
 
-            <div class="add-student-section">
-                <h3><i class="fas fa-user-plus"></i> Add New Student to <span id="addStudentClass"></span></h3>
+            <div class="add-student-section card">
+                <h3>Add New Student to <span id="addStudentClass"></span></h3>
                 <div class="input-group">
-                    <input type="text" id="newStudentName" placeholder="Enter new student's full name" required class="form-input">
-                    <button id="addNewStudentBtn" class="action-button success-button"><i class="fas fa-plus-circle"></i> Add Student</button>
+                    <input type="text" id="newStudentName" placeholder="Enter student name" required class="text-input">
+                    <button id="addNewStudentBtn" class="action-button add-button">Add Student</button>
                 </div>
-                <p class="section-description">Add new students to the selected class. This will make them available for attendance marking.</p>
+                <p class="info-text">New students are added to the selected class.</p>
             </div>
 
-            <button id="saveAttendanceBtn" class="action-button primary-button large-button"><i class="fas fa-save"></i> Save All Attendance</button>
+            <button id="saveAttendanceBtn" class="action-button save-button">Save Attendance</button>
         </section>
 
-        <nav class="navigation-buttons">
-            <a href="index.html" class="section-button nav-button">
+        <div class="navigation-buttons">
+            <a href="index.html" class="section-button small-button">
                 <i class="fas fa-home icon"></i>
                 <span>Back to Home</span>
             </a>
-        </nav>
-    </main>
-
-    <footer class="main-footer">
-        <p>&copy; <span id="currentYearFooter"></span> Academic Pulse. All rights reserved.</p>
-    </footer>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/monitor.js"></script>
-    <script>
-        // Script for footer year and theme preference
-        document.getElementById('currentYearFooter').textContent = new Date().getFullYear();
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentTheme = localStorage.getItem('theme') || 'light-mode';
-            document.body.classList.add(currentTheme);
-        });
-    </script>
 </body>
 </html>
