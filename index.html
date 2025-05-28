@@ -3,102 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Pulse: School Attendance System</title>
+    <title>School Attendance System - Welcome</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Welcome to the School Attendance System. Manage and view student attendance effortlessly.">
+    <meta name="keywords" content="school, attendance, system, students, monitor, education, Firebase">
 </head>
-<body class="light-mode">
-    <header class="main-header">
-        <div class="header-content">
-            <h1 class="app-title">Academic Pulse</h1>
-            <p class="app-tagline">Streamlining School Attendance Management</p>
+<body>
+    <div class="container welcome-container">
+        <header class="system-header">
+            <h1 class="fade-in">Welcome to the <span class="highlight">Attendance System</span></h1>
+            <p class="tagline fade-in delay-1">Streamlining student record keeping for a better educational experience.</p>
+        </header>
+
+        <div class="main-sections fade-in delay-2">
+            <a href="students.html" class="section-button glow-on-hover">
+                <i class="fas fa-user-graduate icon"></i>
+                <span class="button-text">Student Portal</span>
+                <p class="button-description">View attendance for your class.</p>
+            </a>
+            <a href="monitor.html" class="section-button glow-on-hover">
+                <i class="fas fa-chalkboard-teacher icon"></i>
+                <span class="button-text">Monitor Dashboard</span>
+                <p class="button-description">Manage and update attendance records.</p>
+            </a>
         </div>
-        <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
-            <i class="fas fa-moon"></i>
-        </button>
-    </header>
 
-    <main class="container">
-        <section class="welcome-section">
-            <h2 class="section-title">Welcome to Your School's Attendance Hub!</h2>
-            <p class="section-description">
-                Effortlessly manage and view student attendance records. Our intuitive system provides real-time insights
-                into daily attendance, supporting both students and administrative staff.
-            </p>
-        </section>
-
-        <section class="main-sections-grid">
-            <div class="section-card">
-                <a href="students.html" class="section-button">
-                    <i class="fas fa-calendar-alt icon"></i>
-                    <span>View Attendance Dates</span>
-                </a>
-                <p class="card-description">
-                    Access historical attendance data by date. See who was present or absent on any given day.
-                </p>
-            </div>
-
-            <div class="section-card">
-                <a href="monitor.html" class="section-button">
-                    <i class="fas fa-chalkboard-teacher icon"></i>
-                    <span>Monitor Attendance</span>
-                </a>
-                <p class="card-description">
-                    Dedicated portal for staff to record, update, and manage student attendance.
-                </p>
-            </div>
-        </section>
-
-        <section class="about-section">
-            <h3 class="section-subtitle">About Academic Pulse</h3>
-            <p class="section-text">
-                Designed with simplicity and efficiency in mind, Academic Pulse helps schools maintain accurate attendance records
-                with minimal effort. Leveraging modern web technologies, we aim to enhance transparency and streamline operations.
-            </p>
-            <p class="section-text">
-                This system is built using HTML, CSS, JavaScript, and Firebase for backend data storage, ensuring
-                a responsive and dynamic user experience.
-            </p>
-        </section>
-    </main>
-
-    <footer class="main-footer">
-        <p>&copy; <span id="currentYear"></span> Academic Pulse. All rights reserved.</p>
-        <p>Built with <i class="fas fa-heart footer-icon"></i> for educational purposes.</p>
-    </footer>
-
+        <footer class="system-footer fade-in delay-3">
+            <p>&copy; <span id="current-year"></span> School Attendance System. All rights reserved.</p>
+            <p>Developed with ❤️ and Firebase.</p>
+        </footer>
+    </div>
     <script>
-        // Basic JavaScript for the current year in footer and dark mode toggle
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        // Load theme preference from local storage
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            body.classList.remove('light-mode', 'dark-mode'); // Remove default class
-            body.classList.add(currentTheme);
-            if (currentTheme === 'dark-mode') {
-                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-            }
-        }
-
-        darkModeToggle.addEventListener('click', () => {
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                body.classList.add('light-mode');
-                localStorage.setItem('theme', 'light-mode');
-                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-            } else {
-                body.classList.remove('light-mode');
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark-mode');
-                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            }
-        });
+        document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
