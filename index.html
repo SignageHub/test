@@ -3,22 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Attendance System</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
+    <title>Caring Heart - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the Attendance System</h1>
-        <div class="main-sections">
-            <a href="students.html" class="section-button">
-                <i class="fas fa-user-graduate icon"></i>
-                <span>Students</span>
-            </a>
-            <a href="monitor.html" class="section-button"> <i class="fas fa-chalkboard-teacher icon"></i>
-                <span>Monitor</span>
-            </a>
+    <header>
+        <div class="header-brand">
+            <img src="img/slazzer-edit-image-removebg-preview (1)_preview_rev_1.png" alt="Caring Heart Logo" class="header-logo" />
+            <h1 class="brand-title">Caring Heart</h1>
         </div>
-    </div>
+        <div class="header-buttons">
+            <a href="#" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="#" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleDropdown()">
+            <i class="fas fa-bars"></i> </button>
+        <div class="dropdown-panel" id="dropdownPanel">
+            <a href="#" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="#" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="dashboard-buttons">
+            <button id="studentsBtn" class="btn btn-success">
+                <i class="fas fa-user-graduate"></i> Students
+            </button>
+            <button id="staffBtn" class="btn btn-success">
+                <i class="fas fa-users"></i> Staff
+            </button>
+            <button id="nonStaffBtn" class="btn btn-success">
+                <i class="fas fa-user-tie"></i> Non-Staff
+            </button>
+            <button id="monitorBtn" class="btn btn-primary">
+                <i class="fas fa-eye"></i> Monitor
+            </button>
+        </section>
+    </main>
+
+    <script>
+        // Toggle dropdown menu for mobile
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownPanel');
+            dropdown.classList.toggle('show');
+        }
+
+        // Dashboard buttons navigation
+        document.getElementById('studentsBtn').addEventListener('click', () => {
+            window.location.href = 'students.html';
+        });
+
+        document.getElementById('staffBtn').addEventListener('click', () => {
+            alert('Staff portal is not yet implemented.'); // Placeholder for staff page
+            // window.location.href = 'staff.html';
+        });
+
+        document.getElementById('nonStaffBtn').addEventListener('click', () => {
+            alert('Non-Staff portal is not yet implemented.'); // Placeholder for non-staff page
+            // window.location.href = 'nonstaff.html';
+        });
+
+        document.getElementById('monitorBtn').addEventListener('click', () => {
+            // Direct link to monitor.html as per our previous discussion
+            window.location.href = 'monitor.html';
+        });
+
+        // Hide dropdown if window is resized above mobile breakpoint
+        window.addEventListener('resize', () => {
+            const dropdown = document.getElementById('dropdownPanel');
+            if (window.innerWidth > 768) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
