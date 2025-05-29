@@ -65,6 +65,70 @@ header {
     display: none; /* Hide for now, can be toggled by JS */
 }
 
+/* NEW: Password Gate Styling */
+.password-gate {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Above header */
+}
+
+.password-box {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.password-box h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.password-box p {
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.password-box input[type="password"] {
+    width: calc(100% - 30px); /* Adjust for padding */
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.1em;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.password-box input[type="password"]:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.password-box .action-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2em;
+}
+/* END NEW: Password Gate Styling */
+
+/* Utility for hiding/showing elements */
+.hidden {
+    display: none !important;
+}
+
 /* Hero Section (index.html) */
 .hero-section {
     text-align: center;
@@ -649,6 +713,20 @@ section h2 {
     }
     .use-instructions {
         grid-template-columns: 1fr; /* Single column layout */
+    }
+
+    /* Password gate on smaller screens */
+    .password-gate {
+        padding: 10px;
+    }
+    .password-box {
+        padding: 25px;
+    }
+    .password-box h2 {
+        font-size: 1.5em;
+    }
+    .password-box p {
+        font-size: 0.9em;
     }
 }
 
