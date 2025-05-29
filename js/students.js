@@ -1,117 +1,171 @@
 // js/students.js
-let selectedClass = '';
-let selectedDate = '';
+// Ensure Firebase is initialized in firebase-init.js
+const db = window.db; // Access the globally available Firestore instance
+
+let selectedClass = null; // To store the currently selected class ID (e.g., 'S.1')
+let selectedDate = null; // To store the currently selected date (YYYY-MM-DD)
 
 document.addEventListener('DOMContentLoaded', () => {
-    const classButtons = document.querySelectorAll('#studentClassSelection .class-button');
-    const dateSelectionDiv = document.getElementById('dateSelection');
-    const attendanceDateInput = document.getElementById('attendanceDateStudent');
+    const classButtonsContainer = document.getElementById('classButtonsContainer');
+    const attendanceDateInput = document.getElementById('attendanceDate');
     const viewAttendanceBtn = document.getElementById('viewAttendanceBtn');
-    const attendanceTableContainer = document.getElementById('attendanceTableContainer');
-    const attendanceTableBody = document.querySelector('#attendanceTable tbody');
-    const selectedClassSpan = document.getElementById('selectedClassStudent');
-    const selectedClassHeaderSpan = document.getElementById('selectedClassStudentHeader'); // For the H2
-    const selectedDateSpan = document.getElementById('selectedDateStudent');
+    const attendanceTableBody = document.getElementById('attendanceTableBody');
+    const displayClassSpan = document.getElementById('displayClass');
+    const displayDateSpan = document.getElementById('displayDate');
 
-    // Reference to the global db object
-    const db = window.db;
+    // Default classes to show if Firebase fails or is empty initially
+    const defaultClasses = ['S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6'];
 
-    // --- Class Selection ---
-    classButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove 'selected' class from all buttons
-            classButtons.forEach(btn => btn.classList.remove('selected'));
-            // Add 'selected' class to the clicked button
-            button.classList.add('selected');
-
-            selectedClass = button.dataset.class;
-            selectedClassHeaderSpan.textContent = selectedClass; // Update H2 in date selection
-            dateSelectionDiv.style.display = 'block'; // Show date selection
-            attendanceTableContainer.style.display = 'none'; // Hide table until date is selected
-            attendanceTableBody.innerHTML = ''; // Clear previous table data
-            attendanceDateInput.value = ''; // Clear previous date selection
-            console.log(`Class selected: ${selectedClass}`);
+    // --- Helper function to load class buttons into the UI ---
+    function loadClassButtons(classes) {
+        classButtonsContainer.innerHTML = ''; // Clear existing buttons
+        classes.forEach(classId => {
+            const button = document.createElement('button');
+            button.classList.add('class-button');
+            button.textContent = classId; // Display S.1, S.2 etc.
+            button.setAttribute('data-class-id', classId); // Use data-class-id for consistency
+            button.addEventListener('click', () => {
+                // Remove 'selected' from previously selected button
+                document.querySelectorAll('.class-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Add 'selected' to the clicked button
+                button.classList.add('selected');
+                selectedClass = classId; // Update selected class ID
+                console.log('Student Portal: Selected Class:', selectedClass);
+                displayAttendanceTable(selectedClass, selectedDate); // Re-display if date is already selected
+            });
+            classButtonsContainer.appendChild(button);
         });
+    }
+
+    // --- Initialize Class Buttons from Firebase or Defaults ---
+    if (db) {
+        db.collection('classes').orderBy('order').get().then((snapshot) => { // Order by 'order' field if present, else by 'name'
+            if (!snapshot.empty) {
+                const firebaseClasses = [];
+                snapshot.forEach(doc => {
+                    firebaseClasses.push(doc.id); // Use document ID (e.g., 'S.1') as classId
+                });
+                loadClassButtons(firebaseClasses);
+            } else {
+                console.warn("No classes found in Firebase 'classes' collection. Loading default classes.");
+                loadClassButtons(defaultClasses); // Fallback to default
+            }
+        }).catch(error => {
+            console.error("Error loading classes from Firebase:", error);
+            loadClassButtons(defaultClasses); // Fallback to default on error
+        });
+    } else {
+        console.warn("Firebase Firestore not initialized. Using default classes.");
+        loadClassButtons(defaultClasses); // Fallback to default if Firebase isn't ready
+    }
+
+    // --- Date Selection and View Button Logic ---
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    attendanceDateInput.value = `${yyyy}-${mm}-${dd}`; // Set default date to today
+    selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate
+
+    attendanceDateInput.addEventListener('change', (event) => {
+        selectedDate = event.target.value;
+        console.log('Student Portal: Selected Date:', selectedDate);
+        displayAttendanceTable(selectedClass, selectedDate); // Re-display if class is already selected
     });
 
-    // --- View Attendance for Selected Date ---
-    viewAttendanceBtn.addEventListener('click', async () => {
-        selectedDate = attendanceDateInput.value;
-
+    viewAttendanceBtn.addEventListener('click', () => {
         if (!selectedClass) {
-            alert('Please select a class first to view attendance.');
+            alert('Please select a class first.');
             return;
         }
         if (!selectedDate) {
-             alert('Please select a date to view attendance.');
-             return;
+            alert('Please select a date.');
+            return;
         }
-
-        selectedClassSpan.textContent = selectedClass;
-        selectedDateSpan.textContent = selectedDate;
-        attendanceTableContainer.style.display = 'block'; // Show attendance table
-        console.log(`Loading attendance for Class: ${selectedClass}, Date: ${selectedDate}`);
-
-        await loadStudentAttendance();
+        displayAttendanceTable(selectedClass, selectedDate);
     });
 
-    async function loadStudentAttendance() {
-        attendanceTableBody.innerHTML = '<tr><td colspan="2"><i class="fas fa-spinner fa-spin"></i> Loading attendance...</td></tr>'; // Loading message
+    // --- Display Attendance Table (Live Data from Firebase) ---
+    async function displayAttendanceTable(classId, date) {
+        attendanceTableBody.innerHTML = '<tr><td colspan="3"><i class="fas fa-spinner fa-spin"></i> Loading attendance...</td></tr>'; // Loading message
+        displayClassSpan.textContent = classId ? classId : '[Not Selected]';
+        displayDateSpan.textContent = date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '[Not Selected]';
+
+
+        if (!classId || !date) {
+            attendanceTableBody.innerHTML = '<tr><td colspan="3">Please select a class and date to view attendance.</td></tr>';
+            return;
+        }
+
+        if (!db) {
+            console.error("Firestore instance is not available.");
+            attendanceTableBody.innerHTML = '<tr><td colspan="3">System error: Firestore not connected.</td></tr>';
+            return;
+        }
 
         try {
-            // Fetch students for the selected class
-            const classDocRef = db.collection('classes').doc(selectedClass);
-            const classDoc = await classDocRef.get();
+            // 1. Fetch students for the selected class
+            const studentsRef = db.collection('students').doc(classId).collection('students');
+            const studentsSnapshot = await studentsRef.get();
 
-            let students = [];
-            if (classDoc.exists && classDoc.data().students) {
-                students = classDoc.data().students; // Array of student names
-                console.log(`Students found for ${selectedClass}:`, students);
+            let studentsInClass = [];
+            if (!studentsSnapshot.empty) {
+                studentsSnapshot.forEach(doc => {
+                    studentsInClass.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by roll number (ensure roll is a string for localeCompare)
+                studentsInClass.sort((a, b) => (a.roll || '').localeCompare(b.roll || '', undefined, { numeric: true, sensitivity: 'base' }));
             } else {
-                attendanceTableBody.innerHTML = '<tr><td colspan="2">No students found for this class.</td></tr>';
-                console.warn(`No student list in 'classes/${selectedClass}' document.`);
+                attendanceTableBody.innerHTML = `<tr><td colspan="3">No students found for ${classId}.</td></tr>`;
                 return;
             }
 
-            // Fetch attendance for the selected class and date
-            const attendanceDocId = `${selectedClass}_${selectedDate}`; // e.g., S.1_2023-10-26
-            const attendanceDocRef = db.collection('attendance').doc(attendanceDocId);
+            // 2. Fetch attendance records for the selected date and class
+            const attendanceDocRef = db.collection('attendance_records').doc(date).collection('attendance').doc(classId);
             const attendanceDoc = await attendanceDocRef.get();
-            const attendanceData = attendanceDoc.exists ? attendanceDoc.data().records : {};
-            console.log(`Attendance data for ${attendanceDocId}:`, attendanceData);
+            const attendanceRecords = attendanceDoc.exists ? attendanceDoc.data() : {};
 
             attendanceTableBody.innerHTML = ''; // Clear loading message
 
-            if (students.length === 0) {
-                 attendanceTableBody.innerHTML = '<tr><td colspan="2">No students added to this class yet.</td></tr>';
-                 return;
+            if (studentsInClass.length === 0) {
+                attendanceTableBody.innerHTML = `<tr><td colspan="3">No students found for ${classId} on ${date}.</td></tr>`;
+                return;
             }
 
-            students.sort((a, b) => a.localeCompare(b)); // Sort students alphabetically
+            studentsInClass.forEach(student => {
+                const row = document.createElement('tr');
+                let statusIcon = '';
+                let rowClass = '';
+                const status = attendanceRecords[student.id] || 'N/A'; // Get status by student Firestore ID
 
-            students.forEach(studentName => {
-                const row = attendanceTableBody.insertRow();
-                const nameCell = row.insertCell(0);
-                const statusCell = row.insertCell(1);
-
-                nameCell.textContent = studentName;
-
-                const status = attendanceData[studentName];
                 if (status === 'present') {
-                    statusCell.innerHTML = '<i class="fas fa-check status-icon present"></i> Present';
-                    row.classList.add('attendance-present'); // Add class for styling
+                    statusIcon = '<i class="fas fa-check-circle status-icon present"></i> Present';
+                    rowClass = 'attendance-present';
                 } else if (status === 'absent') {
-                    statusCell.innerHTML = '<i class="fas fa-times status-icon absent"></i> Absent';
-                    row.classList.add('attendance-absent'); // Add class for styling
+                    statusIcon = '<i class="fas fa-times-circle status-icon absent"></i> Absent';
+                    rowClass = 'attendance-absent';
                 } else {
-                    statusCell.innerHTML = 'N/A <span class="info-icon" title="No record found for this student on this date."><i class="fas fa-info-circle"></i></span>'; // More informative N/A
-                    row.classList.add('attendance-na'); // Add class for styling
+                    statusIcon = 'N/A';
+                    rowClass = 'attendance-na';
                 }
+
+                row.classList.add(rowClass);
+                row.innerHTML = `
+                    <td>${student.roll || 'N/A'}</td>
+                    <td>${student.name || 'N/A'}</td>
+                    <td>${statusIcon}</td>
+                `;
+                attendanceTableBody.appendChild(row);
             });
 
         } catch (error) {
-            console.error("Error loading student attendance:", error);
-            attendanceTableBody.innerHTML = '<tr><td colspan="2" style="color: red;">Error loading attendance data. Please try again.</td></tr>';
+            console.error("Error fetching attendance data from Firebase: ", error);
+            attendanceTableBody.innerHTML = `<tr><td colspan="3">Error loading attendance data. Please check your browser's console for details.</td></tr>`;
         }
     }
+
+    // Initial display call (will show "Select a class and date" initially)
+    displayAttendanceTable(selectedClass, selectedDate);
 });
