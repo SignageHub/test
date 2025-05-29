@@ -16,16 +16,11 @@
             <img src="img/slazzer-edit-image-removebg-preview (1)_preview_rev_1.png" alt="Caring Heart Logo" class="header-logo" />
             <h1 class="brand-title">Caring Heart</h1>
         </div>
-        <div class="header-buttons">
-            <a href="login.html" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
-            <a href="login.html" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
-        </div>
         <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleDropdown()">
-            <i class="fas fa-bars"></i> </button>
+            <i class="fas fa-bars"></i>
+        </button>
         <div class="dropdown-panel" id="dropdownPanel">
-            <a href="login.html" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
-            <a href="login.html" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
-        </div>
+            </div>
     </header>
 
     <div class="container welcome-container">
@@ -68,17 +63,16 @@
         // Set current year in footer
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // Toggle dropdown menu for mobile (from provided code)
+        // Toggle dropdown menu for mobile
         function toggleDropdown() {
             const dropdown = document.getElementById('dropdownPanel');
             dropdown.classList.toggle('show');
-            // Accessibility: Toggle aria-expanded
             const menuToggleBtn = document.querySelector('.menu-toggle');
             const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
         }
 
-        // Monitor button logic with password prompt (adapted from provided code)
+        // Monitor button logic with password prompt
         const monitorBtn = document.getElementById('monitorBtn');
         const modal = document.getElementById('monitorPasswordPrompt');
         const submitBtn = document.getElementById('submitMonitorPassword');
@@ -98,10 +92,10 @@
         });
 
         submitBtn.addEventListener('click', () => {
-            const correctPassword = '19972010'; // <-- CHANGE THIS TO YOUR REAL PASSWORD FOR SECURITY
+            const correctPassword = '19972010'; // YOUR PASSWORD HERE
             if (passwordInput.value === correctPassword) {
                 modal.style.display = 'none';
-                window.location.href = 'monitor.html'; // Direct to our existing monitor.html
+                window.location.href = 'monitor.html'; // Redirect to our existing monitor.html
             } else {
                 errorMessage.textContent = 'Incorrect password. Please try again.';
                 passwordInput.value = '';
