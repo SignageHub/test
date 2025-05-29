@@ -20,7 +20,16 @@
             </div>
     </header>
 
-    <div class="container">
+    <div class="password-gate" id="passwordGate">
+        <div class="password-box">
+            <h2>Monitor Access</h2>
+            <p>Please enter the monitor password to access the dashboard.</p>
+            <input type="password" id="monitorPassword" placeholder="Enter password" autocomplete="off" />
+            <button id="enterMonitorBtn" class="action-button primary-button">Enter Dashboard</button>
+            <p id="passwordMessage" class="warning-text"></p>
+        </div>
+    </div>
+    <div class="container main-content hidden" id="monitorContent">
         <section class="portal-header">
             <h2>Monitor Dashboard</h2>
             <p class="sub-heading">Manage student attendance records and add/remove students for <span id="selectedClassName">[No Class Selected]</span>.</p>
