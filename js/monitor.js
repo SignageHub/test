@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
     document.getElementById('addStudentBtn').addEventListener('click', addStudent);
 
+    // NEW: Event listener for the permanent remove student button
+    document.getElementById('removeStudentPermanentlyBtn').addEventListener('click', removeStudentByName);
+
+
     // Event delegation for class selection buttons
     document.getElementById('classSelection').addEventListener('click', (e) => {
         if (e.target.classList.contains('class-button-monitor')) {
@@ -36,11 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event delegation for 'Remove' student buttons (NEW)
+    // Event delegation for 'Quick Remove' student buttons in table (NEW)
     document.getElementById('attendanceTableBody').addEventListener('click', async (e) => {
         if (e.target.closest('.remove-student-btn')) { // Use closest to handle clicks on icon inside button
             const button = e.target.closest('.remove-student-btn');
             const studentId = button.dataset.studentId;
+            // The existing removeStudent function already handles the "forever" part now
             await removeStudent(studentId);
         }
     });
@@ -165,10 +170,10 @@ function displayAttendanceTable(students, attendanceRecords) {
             </div>
         `;
 
-        // NEW: Add the Remove button cell
+        // Add the Quick Remove (trash) button cell
         const removeCell = row.insertCell();
         removeCell.innerHTML = `
-            <button class="remove-student-btn" data-student-id="${student.id}" aria-label="Remove student ${student.name}">
+            <button class="remove-student-btn" data-student-id="${student.id}" aria-label="Quick remove student ${student.name}">
                 <i class="fas fa-trash-alt"></i> </button>
         `;
     });
@@ -248,55 +253,127 @@ async function addStudent() {
     }
 }
 
-// NEW: Function to remove a student
+// Function to permanently remove a student and their attendance records for the selected class
+// This function is called by both the table's trash icon and the new "Remove Student" button.
 async function removeStudent(studentId) {
     if (!selectedClassId) {
         alert('Error: No class selected.');
+        document.getElementById('removeStudentMessage').textContent = 'Please select a class.';
         return;
     }
 
     const studentToRemove = studentsData.find(s => s.id === studentId);
     if (!studentToRemove) {
         alert('Error: Student not found in current list.');
+        document.getElementById('removeStudentMessage').textContent = 'Student not found in this class.';
         return;
     }
 
-    const confirmRemoval = confirm(`Are you sure you want to remove ${studentToRemove.name} from ${document.getElementById('selectedClassName').textContent}? This action cannot be undone.`);
+    const confirmRemoval = confirm(`WARNING: Are you sure you want to permanently remove ${studentToRemove.name} from all records in ${document.getElementById('selectedClassName').textContent}? This includes their student profile AND all historical attendance records for this class. This action cannot be undone.`);
 
     if (!confirmRemoval) {
+        document.getElementById('removeStudentMessage').textContent = 'Student removal cancelled.';
         return; // User cancelled
     }
 
-    document.getElementById('attendanceMessage').textContent = `Removing ${studentToRemove.name}...`;
+    document.getElementById('attendanceMessage').textContent = `Permanently removing ${studentToRemove.name} and their attendance records...`;
+    document.getElementById('removeStudentMessage').textContent = `Permanently removing ${studentToRemove.name}...`;
+
 
     try {
-        // Delete student document from the 'students' subcollection
+        // 1. Delete student document from the 'students' subcollection
         const studentDocRef = db.collection('students').doc(selectedClassId).collection('students').doc(studentId);
         await studentDocRef.delete();
 
-        // Optional: Delete their attendance records for the currently viewed date if desired.
-        // If attendance is marked per student ID in a date-class document,
-        // you would update that specific field. For now, we assume deleting student
-        // from 'students' collection is enough, as past attendance remains for historical
-        // purposes, but the student won't appear in future attendance lists.
-        // If you want to remove past attendance records for *this specific student* across *all dates*:
-        // This is complex and requires iterating through all attendance_records,
-        // which can be costly and slow. Generally, for a student leaving,
-        // removing them from the active student list is sufficient.
+        // 2. Remove student's attendance entries from all relevant daily attendance records
+        // This process iterates through ALL date documents in 'attendance_records'.
+        // For a very large dataset (e.g., years of daily attendance), this can be slow
+        // and incur many read/write operations. For robust, large-scale deletions,
+        // consider implementing this logic using Firebase Cloud Functions.
+        const attendanceRecordsCollectionRef = db.collection('attendance_records');
+        const allDateAttendanceSnap = await attendanceRecordsCollectionRef.get();
 
-        document.getElementById('attendanceMessage').textContent = `${studentToRemove.name} removed successfully.`;
-        // Remove the row from the HTML table
+        const batch = db.batch(); // Use a batch write for efficiency (up to 500 operations per batch)
+        let operationsInBatch = 0;
+
+        for (const dateDoc of allDateAttendanceSnap.docs) {
+            const date = dateDoc.id;
+            const classAttendanceDocRef = attendanceRecordsCollectionRef.doc(date).collection('attendance').doc(selectedClassId);
+
+            // Check if the class attendance document exists and contains the student's record
+            const classAttendanceSnap = await classAttendanceDocRef.get();
+
+            if (classAttendanceSnap.exists && classAttendanceSnap.data()[studentId] !== undefined) {
+                // If it exists and has an entry for this student, remove that specific field
+                batch.update(classAttendanceDocRef, {
+                    [studentId]: firebase.firestore.FieldValue.delete()
+                });
+                operationsInBatch++;
+
+                // Commit batch if it gets too large to avoid exceeding the 500 operation limit
+                if (operationsInBatch === 499) { // Save one slot for safety
+                    await batch.commit();
+                    operationsInBatch = 0; // Reset batch counter
+                }
+            }
+        }
+
+        // Commit any remaining operations in the last batch
+        if (operationsInBatch > 0) {
+            await batch.commit();
+        }
+
+        document.getElementById('attendanceMessage').textContent = `${studentToRemove.name} permanently removed from all records in this class.`;
+        document.getElementById('removeStudentMessage').textContent = `${studentToRemove.name} permanently removed.`;
+
+        // Remove the row from the HTML table (UI update)
         const rowToRemove = document.querySelector(`#attendanceTableBody tr[data-student-id="${studentId}"]`);
         if (rowToRemove) {
             rowToRemove.remove();
         }
 
-        // Update studentsData array
+        // Update studentsData array to reflect removal in current session
         studentsData = studentsData.filter(s => s.id !== studentId);
 
-        setTimeout(() => document.getElementById('attendanceMessage').textContent = '', 3000);
+        // Clear messages after a longer duration for permanent actions
+        setTimeout(() => {
+            document.getElementById('attendanceMessage').textContent = '';
+            document.getElementById('removeStudentMessage').textContent = '';
+        }, 5000);
     } catch (error) {
-        console.error("Error removing student:", error);
-        document.getElementById('attendanceMessage').textContent = `Error removing ${studentToRemove.name}.`;
+        console.error("Error permanently removing student:", error);
+        document.getElementById('attendanceMessage').textContent = `Error permanently removing ${studentToRemove.name}. Check console for details.`;
+        document.getElementById('removeStudentMessage').textContent = `Error removing ${studentToRemove.name}.`;
     }
+}
+
+// NEW: Function to handle removal via the 'Remove Student' button (by name)
+async function removeStudentByName() {
+    const studentNameInput = document.getElementById('studentToRemoveName');
+    const studentName = studentNameInput.value.trim();
+    const removeStudentMessage = document.getElementById('removeStudentMessage');
+
+    if (!selectedClassId) {
+        removeStudentMessage.textContent = 'Please select a class first.';
+        return;
+    }
+
+    if (!studentName) {
+        removeStudentMessage.textContent = 'Please enter the student\'s name to remove.';
+        return;
+    }
+
+    // Find the student ID based on the name in the currently loaded studentsData
+    const studentToRemove = studentsData.find(s => s.name.toLowerCase() === studentName.toLowerCase());
+
+    if (!studentToRemove) {
+        removeStudentMessage.textContent = `Student "${studentName}" not found in ${document.getElementById('selectedClassName').textContent}. Please ensure the name is exact.`;
+        return;
+    }
+
+    // Call the main removeStudent function with the found ID
+    await removeStudent(studentToRemove.id);
+
+    // Clear the input field after attempting removal
+    studentNameInput.value = '';
 }
