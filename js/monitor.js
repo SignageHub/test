@@ -1,32 +1,48 @@
-// Ensure Firebase is initialized in firebase-init.js
-// For Firestore access
-const db = firebase.firestore();
+// js/monitor.js
+const db = window.db; // Access the globally available Firestore instance
 
-let selectedClassId = null;
-let selectedDate = null;
-let studentsData = []; // To store current students in the selected class
+let selectedClassId = null; // Stores the Firestore document ID of the selected class (e.g., 'S.1')
+let selectedDate = null; // Stores the selected date in YYYY-MM-DD format
+let studentsData = []; // Stores the array of student objects currently loaded for the selected class
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Cache DOM elements
+    const attendanceDateMonitorInput = document.getElementById('attendanceDateMonitor');
+    const loadAttendanceBtn = document.getElementById('loadAttendanceBtn');
+    const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+    const addStudentBtn = document.getElementById('addStudentBtn');
+    const removeStudentByNameBtn = document.getElementById('removeStudentByNameBtn');
+    const classButtonsContainer = document.getElementById('classButtonsContainer');
+    const monitorAttendanceTableBody = document.getElementById('monitorAttendanceTableBody');
+    const selectedClassNameSpan = document.getElementById('selectedClassName');
+    const displayDateSpan = document.getElementById('displayDate');
+    const attendanceMessageSpan = document.getElementById('attendanceMessage');
+    const addStudentMessageSpan = document.getElementById('addStudentMessage');
+    const removeStudentMessageSpan = document.getElementById('removeStudentMessage');
+
     // Set default date to today
     const today = new Date();
     const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
-    document.getElementById('attendanceDate').value = `${yyyy}-${mm}-${dd}`;
+    attendanceDateMonitorInput.value = `${yyyy}-${mm}-${dd}`;
+    selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate
 
-    loadClasses(); // Load class buttons initially
+    // Load class buttons initially
+    loadClasses();
 
-    // Event Listeners
-    document.getElementById('loadAttendanceBtn').addEventListener('click', loadAttendanceForSelectedClassAndDate);
-    document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
-    document.getElementById('addStudentBtn').addEventListener('click', addStudent);
-
-    // NEW: Event listener for the permanent remove student button
-    document.getElementById('removeStudentPermanentlyBtn').addEventListener('click', removeStudentByName);
-
+    // --- Event Listeners ---
+    loadAttendanceBtn.addEventListener('click', loadAttendanceForSelectedClassAndDate);
+    attendanceDateMonitorInput.addEventListener('change', (event) => {
+        selectedDate = event.target.value;
+        loadAttendanceForSelectedClassAndDate(); // Reload attendance when date changes
+    });
+    saveAttendanceBtn.addEventListener('click', saveAttendance);
+    addStudentBtn.addEventListener('click', addStudent);
+    removeStudentByNameBtn.addEventListener('click', removeStudentPermanentlyByName);
 
     // Event delegation for class selection buttons
-    document.getElementById('classSelection').addEventListener('click', (e) => {
+    classButtonsContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('class-button-monitor')) {
             // Remove 'selected' class from all buttons
             document.querySelectorAll('.class-button-monitor').forEach(btn => {
@@ -35,95 +51,143 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add 'selected' class to the clicked button
             e.target.classList.add('selected');
             selectedClassId = e.target.dataset.classId;
-            document.getElementById('selectedClassName').textContent = e.target.textContent; // Update display
+            selectedClassNameSpan.textContent = e.target.textContent; // Update display
             loadAttendanceForSelectedClassAndDate(); // Load attendance for the newly selected class
         }
     });
 
-    // Event delegation for 'Quick Remove' student buttons in table (NEW)
-    document.getElementById('attendanceTableBody').addEventListener('click', async (e) => {
+    // Event delegation for 'Quick Remove' student buttons in table
+    monitorAttendanceTableBody.addEventListener('click', async (e) => {
         if (e.target.closest('.remove-student-btn')) { // Use closest to handle clicks on icon inside button
             const button = e.target.closest('.remove-student-btn');
             const studentId = button.dataset.studentId;
-            // The existing removeStudent function already handles the "forever" part now
-            await removeStudent(studentId);
+            // Confirm with user before quick removal
+            if (confirm("Are you sure you want to permanently remove this student from the class and all their attendance records? This action cannot be undone.")) {
+                await removeStudentPermanentlyById(studentId);
+            }
         }
     });
+
+    // Initial display of the selected class and date
+    selectedClassNameSpan.textContent = '[No Class Selected]';
+    displayDateSpan.textContent = new Date(selectedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 });
 
+// --- Class Loading Functions ---
 async function loadClasses() {
-    const classSelectionDiv = document.getElementById('classSelection');
-    classSelectionDiv.innerHTML = '<p>Loading classes...</p>';
+    const classSelectionDiv = document.getElementById('classButtonsContainer');
+    classSelectionDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Loading classes...</p>';
+
+    const defaultClasses = ['S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6'];
+
+    if (!db) {
+        console.error("Firestore instance not available. Cannot load classes.");
+        loadClassButtonsFromDefaults(defaultClasses);
+        return;
+    }
+
     try {
-        const classesSnapshot = await db.collection('classes').get();
-        if (classesSnapshot.empty) {
-            classSelectionDiv.innerHTML = '<p>No classes found. Please add classes in Firebase.</p>';
-            return;
+        const classesSnapshot = await db.collection('classes').orderBy('order').get(); // Order by 'order' field first
+        let classesToLoad = [];
+        if (!classesSnapshot.empty) {
+            classesSnapshot.forEach(doc => {
+                classesToLoad.push({ id: doc.id, name: doc.data().name || doc.id });
+            });
+            // If 'order' field was not used for sorting, sort by name (ID)
+            classesToLoad.sort((a,b) => (a.name).localeCompare(b.name));
+        } else {
+            console.warn("No classes found in Firebase 'classes' collection. Loading default classes.");
+            classesToLoad = defaultClasses.map(name => ({ id: name, name: name }));
         }
 
         classSelectionDiv.innerHTML = ''; // Clear loading message
-        classesSnapshot.forEach(doc => {
-            const classId = doc.id;
-            const className = doc.data().name || classId;
+        classesToLoad.forEach(classObj => {
             const button = document.createElement('button');
             button.classList.add('class-button-monitor');
-            button.dataset.classId = classId;
-            button.textContent = className;
+            button.dataset.classId = classObj.id;
+            button.textContent = classObj.name;
             classSelectionDiv.appendChild(button);
         });
 
         // Automatically select the first class if none is selected
-        if (!selectedClassId && classesSnapshot.docs.length > 0) {
+        if (!selectedClassId && classesToLoad.length > 0) {
             const firstButton = classSelectionDiv.querySelector('.class-button-monitor');
             if (firstButton) {
                 firstButton.classList.add('selected');
                 selectedClassId = firstButton.dataset.classId;
                 document.getElementById('selectedClassName').textContent = firstButton.textContent;
-                loadAttendanceForSelectedClassAndDate();
+                loadAttendanceForSelectedClassAndDate(); // Load attendance for the auto-selected class
             }
         }
     } catch (error) {
-        console.error("Error loading classes:", error);
-        classSelectionDiv.innerHTML = '<p class="error-message">Error loading classes.</p>';
+        console.error("Error loading classes from Firebase:", error);
+        loadClassButtonsFromDefaults(defaultClasses); // Fallback to default on error
+    }
+
+    function loadClassButtonsFromDefaults(classes) {
+        classSelectionDiv.innerHTML = '';
+        classes.forEach(className => {
+            const button = document.createElement('button');
+            button.classList.add('class-button-monitor');
+            button.dataset.classId = className; // Use class name as ID for defaults
+            button.textContent = className;
+            classSelectionDiv.appendChild(button);
+        });
     }
 }
 
+// --- Attendance Loading and Display Functions ---
 async function loadAttendanceForSelectedClassAndDate() {
-    selectedDate = document.getElementById('attendanceDate').value;
+    selectedDate = document.getElementById('attendanceDateMonitor').value;
+    const monitorAttendanceTableBody = document.getElementById('monitorAttendanceTableBody');
+    const selectedClassNameSpan = document.getElementById('selectedClassName');
+    const displayDateSpan = document.getElementById('displayDate');
+    const attendanceMessageSpan = document.getElementById('attendanceMessage');
+    const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+
+    displayDateSpan.textContent = selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '[Not Selected]';
 
     if (!selectedClassId) {
-        document.getElementById('attendanceMessage').textContent = 'Please select a class.';
-        document.getElementById('attendanceTableBody').innerHTML = ''; // Clear table
-        document.getElementById('saveAttendanceBtn').style.display = 'none';
+        attendanceMessageSpan.textContent = 'Please select a class.';
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4">Please select a class.</td></tr>';
+        saveAttendanceBtn.style.display = 'none';
         return;
     }
     if (!selectedDate) {
-        document.getElementById('attendanceMessage').textContent = 'Please select a date.';
-        document.getElementById('attendanceTableBody').innerHTML = ''; // Clear table
-        document.getElementById('saveAttendanceBtn').style.display = 'none';
+        attendanceMessageSpan.textContent = 'Please select a date.';
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4">Please select a date.</td></tr>';
+        saveAttendanceBtn.style.display = 'none';
         return;
     }
 
-    document.getElementById('displayDate').textContent = new Date(selectedDate).toLocaleDateString();
-    document.getElementById('attendanceMessage').textContent = 'Loading attendance...';
-    document.getElementById('saveAttendanceBtn').style.display = 'none'; // Hide save button while loading
-    document.getElementById('attendanceTableBody').innerHTML = ''; // Clear table
+    attendanceMessageSpan.textContent = '<i class="fas fa-spinner fa-spin"></i> Loading attendance...';
+    saveAttendanceBtn.style.display = 'none'; // Hide save button while loading
+    monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4"><i class="fas fa-spinner fa-spin"></i> Loading students and attendance...</td></tr>';
+
+    if (!db) {
+        console.error("Firestore instance is not available.");
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4">System error: Firestore not connected.</td></tr>';
+        attendanceMessageSpan.textContent = 'Error: Firebase not connected.';
+        return;
+    }
 
     try {
         // 1. Get current list of students for the selected class
-        const studentsSnapshot = await db.collection('students').doc(selectedClassId).collection('students').get();
-        studentsData = []; // Reset students data
-        if (studentsSnapshot.empty) {
-            document.getElementById('attendanceMessage').textContent = 'No students found for this class.';
-            document.getElementById('saveAttendanceBtn').style.display = 'none';
+        const studentsRef = db.collection('students').doc(selectedClassId).collection('students');
+        const studentsSnapshot = await studentsRef.get();
+        studentsData = []; // Reset students data array
+        if (!studentsSnapshot.empty) {
+            studentsSnapshot.forEach(doc => {
+                studentsData.push({ id: doc.id, ...doc.data() });
+            });
+            // Sort by roll number (ensure roll is a string for localeCompare)
+            studentsData.sort((a, b) => (a.roll || '').localeCompare(b.roll || '', undefined, { numeric: true, sensitivity: 'base' }));
+        } else {
+            attendanceMessageSpan.textContent = 'No students found for this class. Use "Add New Student" below.';
+            monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4">No students found for this class.</td></tr>';
+            saveAttendanceBtn.style.display = 'none';
             return;
         }
-        studentsSnapshot.forEach(doc => {
-            studentsData.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Sort students by name
-        studentsData.sort((a, b) => a.name.localeCompare(b.name));
 
         // 2. Get attendance records for the selected date and class
         const attendanceDocRef = db.collection('attendance_records').doc(selectedDate).collection('attendance').doc(selectedClassId);
@@ -131,34 +195,39 @@ async function loadAttendanceForSelectedClassAndDate() {
         const attendanceRecords = attendanceDoc.exists ? attendanceDoc.data() : {};
 
         displayAttendanceTable(studentsData, attendanceRecords);
-        document.getElementById('saveAttendanceBtn').style.display = 'inline-block'; // Show save button
-        document.getElementById('attendanceMessage').textContent = '';
+        saveAttendanceBtn.style.display = 'inline-block'; // Show save button
+        attendanceMessageSpan.textContent = ''; // Clear loading message
 
     } catch (error) {
         console.error("Error loading attendance:", error);
-        document.getElementById('attendanceMessage').textContent = 'Error loading attendance data.';
-        document.getElementById('saveAttendanceBtn').style.display = 'none';
+        attendanceMessageSpan.textContent = 'Error loading attendance data. Please check your browser console.';
+        monitorAttendanceTableBody.innerHTML = '<tr><td colspan="4">Error loading data. Please check console.</td></tr>';
+        saveAttendanceBtn.style.display = 'none';
     }
 }
 
 function displayAttendanceTable(students, attendanceRecords) {
-    const tableBody = document.getElementById('attendanceTableBody');
+    const tableBody = document.getElementById('monitorAttendanceTableBody');
     tableBody.innerHTML = ''; // Clear existing rows
 
     if (students.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="3">No students to display.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="4">No students to display.</td></tr>';
         return;
     }
 
     students.forEach(student => {
         const row = tableBody.insertRow();
-        row.dataset.studentId = student.id; // Store student ID on the row
+        row.dataset.studentId = student.id; // Store student Firestore ID on the row
+
+        const studentRollCell = row.insertCell();
+        studentRollCell.textContent = student.roll || 'N/A'; // Display roll number
 
         const studentNameCell = row.insertCell();
         studentNameCell.textContent = student.name;
 
         const statusCell = row.insertCell();
-        const currentStatus = attendanceRecords[student.id] || 'N/A'; // Default to N/A
+        // Default to 'absent' if no record for the student on this date
+        const currentStatus = attendanceRecords[student.id] || 'absent';
 
         statusCell.innerHTML = `
             <div class="monitor-attendance-status">
@@ -179,15 +248,15 @@ function displayAttendanceTable(students, attendanceRecords) {
     });
 }
 
-
+// --- Save Attendance Changes ---
 async function saveAttendance() {
     if (!selectedClassId || !selectedDate) {
-        document.getElementById('attendanceMessage').textContent = 'Please select a class and date first.';
+        document.getElementById('attendanceMessage').textContent = 'Please select a class and date before saving.';
         return;
     }
 
     const attendanceData = {};
-    const rows = document.querySelectorAll('#attendanceTableBody tr');
+    const rows = document.querySelectorAll('#monitorAttendanceTableBody tr');
 
     rows.forEach(row => {
         const studentId = row.dataset.studentId;
@@ -195,185 +264,220 @@ async function saveAttendance() {
         if (selectedRadio) {
             attendanceData[studentId] = selectedRadio.value;
         } else {
-            // If no status is selected (e.g., newly added student, not yet marked)
-            // You might want to default to 'N/A' or ensure all are marked
-            attendanceData[studentId] = 'N/A';
+            // Default to absent if no status is selected (e.g., newly added student)
+            attendanceData[studentId] = 'absent';
         }
     });
 
-    document.getElementById('attendanceMessage').textContent = 'Saving attendance...';
+    document.getElementById('attendanceMessage').textContent = '<i class="fas fa-spinner fa-spin"></i> Saving attendance...';
+
+    if (!db) {
+        console.error("Firestore instance not available. Cannot save attendance.");
+        document.getElementById('attendanceMessage').textContent = 'Error: Firebase not connected. Cannot save.';
+        return;
+    }
 
     try {
         const attendanceDocRef = db.collection('attendance_records').doc(selectedDate).collection('attendance').doc(selectedClassId);
         await attendanceDocRef.set(attendanceData, { merge: true }); // Use merge to update existing fields without overwriting others
 
         document.getElementById('attendanceMessage').textContent = 'Attendance saved successfully!';
-        setTimeout(() => document.getElementById('attendanceMessage').textContent = '', 3000); // Clear message after 3 seconds
+        // No need to reload table as changes are only to radio buttons, not student list
+        setTimeout(() => document.getElementById('attendanceMessage').textContent = '', 3000);
     } catch (error) {
         console.error("Error saving attendance:", error);
-        document.getElementById('attendanceMessage').textContent = 'Error saving attendance.';
+        document.getElementById('attendanceMessage').textContent = 'Error saving attendance. Please check console.';
     }
 }
 
+// --- Add Student Logic ---
 async function addStudent() {
+    const newStudentRollInput = document.getElementById('newStudentRoll');
     const newStudentNameInput = document.getElementById('newStudentName');
-    const newStudentName = newStudentNameInput.value.trim();
-    const addStudentMessage = document.getElementById('addStudentMessage');
+    const addStudentMessageSpan = document.getElementById('addStudentMessage');
 
     if (!selectedClassId) {
-        addStudentMessage.textContent = 'Please select a class before adding a student.';
+        addStudentMessageSpan.textContent = 'Please select a class before adding a student.';
         return;
     }
 
-    if (!newStudentName) {
-        addStudentMessage.textContent = 'Please enter a student name.';
+    const roll = newStudentRollInput.value.trim();
+    const name = newStudentNameInput.value.trim();
+
+    if (!roll || !name) {
+        addStudentMessageSpan.textContent = 'Please enter both roll number and student name.';
         return;
     }
 
-    addStudentMessage.textContent = 'Adding student...';
+    // Basic validation for roll number (e.g., numeric, non-empty)
+    if (!/^\d+$/.test(roll)) {
+        addStudentMessageSpan.textContent = 'Roll Number must be numeric.';
+        return;
+    }
+
+    addStudentMessageSpan.textContent = '<i class="fas fa-spinner fa-spin"></i> Adding student...';
+
+    if (!db) {
+        console.error("Firestore instance not available. Cannot add student.");
+        addStudentMessageSpan.textContent = 'Error: Firebase not connected. Cannot add student.';
+        return;
+    }
 
     try {
         const studentsRef = db.collection('students').doc(selectedClassId).collection('students');
-        const newStudentRef = await studentsRef.add({
-            name: newStudentName,
-            classId: selectedClassId,
-            // Add any other default student properties here if needed
+
+        // Check if roll number already exists in this class
+        const existingStudentSnap = await studentsRef.where('roll', '==', roll).limit(1).get();
+        if (!existingStudentSnap.empty) {
+            addStudentMessageSpan.textContent = `A student with roll number "${roll}" already exists in ${document.getElementById('selectedClassName').textContent}.`;
+            return;
+        }
+
+        await studentsRef.add({
+            name: name,
+            roll: roll, // Store roll number explicitly
+            classId: selectedClassId, // Store classId for easier queries if needed later
         });
 
-        addStudentMessage.textContent = `Student "${newStudentName}" added successfully to ${selectedClassId}!`;
+        addStudentMessageSpan.textContent = `Student "${name}" (Roll: ${roll}) added successfully!`;
+        newStudentRollInput.value = ''; // Clear input field
         newStudentNameInput.value = ''; // Clear input field
 
-        // Reload attendance to include the new student in the table
+        // Reload attendance table to include the new student
         await loadAttendanceForSelectedClassAndDate();
 
-        setTimeout(() => addStudentMessage.textContent = '', 3000);
+        setTimeout(() => addStudentMessageSpan.textContent = '', 3000);
     } catch (error) {
         console.error("Error adding student:", error);
-        addStudentMessage.textContent = 'Error adding student.';
+        addStudentMessageSpan.textContent = 'Error adding student. Please check console.';
     }
 }
 
-// Function to permanently remove a student and their attendance records for the selected class
-// This function is called by both the table's trash icon and the new "Remove Student" button.
-async function removeStudent(studentId) {
+// --- Remove Student by ID (used by quick remove button) ---
+async function removeStudentPermanentlyById(studentId) {
+    const removeStudentMessageSpan = document.getElementById('removeStudentMessage');
+    const attendanceMessageSpan = document.getElementById('attendanceMessage');
+
     if (!selectedClassId) {
-        alert('Error: No class selected.');
-        document.getElementById('removeStudentMessage').textContent = 'Please select a class.';
+        removeStudentMessageSpan.textContent = 'Error: No class selected for removal.';
         return;
     }
 
     const studentToRemove = studentsData.find(s => s.id === studentId);
     if (!studentToRemove) {
-        alert('Error: Student not found in current list.');
-        document.getElementById('removeStudentMessage').textContent = 'Student not found in this class.';
+        removeStudentMessageSpan.textContent = 'Error: Student not found in current list.';
         return;
     }
 
-    const confirmRemoval = confirm(`WARNING: Are you sure you want to permanently remove ${studentToRemove.name} from all records in ${document.getElementById('selectedClassName').textContent}? This includes their student profile AND all historical attendance records for this class. This action cannot be undone.`);
+    attendanceMessageSpan.textContent = `<i class="fas fa-spinner fa-spin"></i> Permanently removing ${studentToRemove.name} and records...`;
+    removeStudentMessageSpan.textContent = `<i class="fas fa-spinner fa-spin"></i> Permanently removing ${studentToRemove.name}...`;
 
-    if (!confirmRemoval) {
-        document.getElementById('removeStudentMessage').textContent = 'Student removal cancelled.';
-        return; // User cancelled
+    if (!db) {
+        console.error("Firestore instance not available. Cannot remove student.");
+        attendanceMessageSpan.textContent = 'Error: Firebase not connected. Cannot remove.';
+        removeStudentMessageSpan.textContent = 'Error: Firebase not connected. Cannot remove.';
+        return;
     }
 
-    document.getElementById('attendanceMessage').textContent = `Permanently removing ${studentToRemove.name} and their attendance records...`;
-    document.getElementById('removeStudentMessage').textContent = `Permanently removing ${studentToRemove.name}...`;
-
-
     try {
+        const batch = db.batch();
+
         // 1. Delete student document from the 'students' subcollection
         const studentDocRef = db.collection('students').doc(selectedClassId).collection('students').doc(studentId);
-        await studentDocRef.delete();
+        batch.delete(studentDocRef);
 
-        // 2. Remove student's attendance entries from all relevant daily attendance records
-        // This process iterates through ALL date documents in 'attendance_records'.
-        // For a very large dataset (e.g., years of daily attendance), this can be slow
-        // and incur many read/write operations. For robust, large-scale deletions,
-        // consider implementing this logic using Firebase Cloud Functions.
-        const attendanceRecordsCollectionRef = db.collection('attendance_records');
-        const allDateAttendanceSnap = await attendanceRecordsCollectionRef.get();
+        // 2. Remove student's attendance entries from all relevant daily attendance records for this class
+        // This is simplified to only remove from the SELECTED CLASS's attendance records.
+        // For a full system, you might iterate through all dates the student could have attended.
+        // However, iterating *all* date documents and *all* class attendance documents for *every* student
+        // could be extremely expensive. A Cloud Function is recommended for large-scale deletions.
+        // For now, we'll try to find and update attendance for this specific student in existing date records.
+        const attendanceDatesSnapshot = await db.collection('attendance_records').get(); // Get all date documents
 
-        const batch = db.batch(); // Use a batch write for efficiency (up to 500 operations per batch)
-        let operationsInBatch = 0;
-
-        for (const dateDoc of allDateAttendanceSnap.docs) {
+        for (const dateDoc of attendanceDatesSnapshot.docs) {
             const date = dateDoc.id;
-            const classAttendanceDocRef = attendanceRecordsCollectionRef.doc(date).collection('attendance').doc(selectedClassId);
+            const classAttendanceDocRef = db.collection('attendance_records').doc(date).collection('attendance').doc(selectedClassId);
 
-            // Check if the class attendance document exists and contains the student's record
+            // Fetch the attendance for this specific class and date
             const classAttendanceSnap = await classAttendanceDocRef.get();
 
             if (classAttendanceSnap.exists && classAttendanceSnap.data()[studentId] !== undefined) {
-                // If it exists and has an entry for this student, remove that specific field
+                // If the class attendance document exists and has an entry for this student, remove that specific field
                 batch.update(classAttendanceDocRef, {
                     [studentId]: firebase.firestore.FieldValue.delete()
                 });
-                operationsInBatch++;
-
-                // Commit batch if it gets too large to avoid exceeding the 500 operation limit
-                if (operationsInBatch === 499) { // Save one slot for safety
-                    await batch.commit();
-                    operationsInBatch = 0; // Reset batch counter
-                }
             }
         }
 
-        // Commit any remaining operations in the last batch
-        if (operationsInBatch > 0) {
-            await batch.commit();
-        }
+        await batch.commit();
 
-        document.getElementById('attendanceMessage').textContent = `${studentToRemove.name} permanently removed from all records in this class.`;
-        document.getElementById('removeStudentMessage').textContent = `${studentToRemove.name} permanently removed.`;
+        attendanceMessageSpan.textContent = `${studentToRemove.name} permanently removed.`;
+        removeStudentMessageSpan.textContent = `${studentToRemove.name} permanently removed.`;
 
-        // Remove the row from the HTML table (UI update)
-        const rowToRemove = document.querySelector(`#attendanceTableBody tr[data-student-id="${studentId}"]`);
-        if (rowToRemove) {
-            rowToRemove.remove();
-        }
+        // Reload attendance table to reflect the removal
+        await loadAttendanceForSelectedClassAndDate();
 
-        // Update studentsData array to reflect removal in current session
-        studentsData = studentsData.filter(s => s.id !== studentId);
-
-        // Clear messages after a longer duration for permanent actions
         setTimeout(() => {
-            document.getElementById('attendanceMessage').textContent = '';
-            document.getElementById('removeStudentMessage').textContent = '';
-        }, 5000);
+            attendanceMessageSpan.textContent = '';
+            removeStudentMessageSpan.textContent = '';
+        }, 5000); // Keep message longer for permanent action
     } catch (error) {
-        console.error("Error permanently removing student:", error);
-        document.getElementById('attendanceMessage').textContent = `Error permanently removing ${studentToRemove.name}. Check console for details.`;
-        document.getElementById('removeStudentMessage').textContent = `Error removing ${studentToRemove.name}.`;
+        console.error("Error permanently removing student by ID:", error);
+        attendanceMessageSpan.textContent = `Error permanently removing ${studentToRemove.name}. Check console.`;
+        removeStudentMessageSpan.textContent = `Error removing ${studentToRemove.name}.`;
     }
 }
 
-// NEW: Function to handle removal via the 'Remove Student' button (by name)
-async function removeStudentByName() {
+// --- Remove Student Permanently by Name (used by the dedicated button) ---
+async function removeStudentPermanentlyByName() {
     const studentNameInput = document.getElementById('studentToRemoveName');
     const studentName = studentNameInput.value.trim();
-    const removeStudentMessage = document.getElementById('removeStudentMessage');
+    const removeStudentMessageSpan = document.getElementById('removeStudentMessage');
 
     if (!selectedClassId) {
-        removeStudentMessage.textContent = 'Please select a class first.';
+        removeStudentMessageSpan.textContent = 'Please select a class first.';
         return;
     }
 
     if (!studentName) {
-        removeStudentMessage.textContent = 'Please enter the student\'s name to remove.';
+        removeStudentMessageSpan.textContent = 'Please enter the student\'s name to remove.';
         return;
     }
 
-    // Find the student ID based on the name in the currently loaded studentsData
-    const studentToRemove = studentsData.find(s => s.name.toLowerCase() === studentName.toLowerCase());
+    removeStudentMessageSpan.textContent = '<i class="fas fa-spinner fa-spin"></i> Searching for student...';
 
-    if (!studentToRemove) {
-        removeStudentMessage.textContent = `Student "${studentName}" not found in ${document.getElementById('selectedClassName').textContent}. Please ensure the name is exact.`;
+    if (!db) {
+        console.error("Firestore instance not available. Cannot remove student.");
+        removeStudentMessageSpan.textContent = 'Error: Firebase not connected. Cannot remove.';
         return;
     }
 
-    // Call the main removeStudent function with the found ID
-    await removeStudent(studentToRemove.id);
+    try {
+        // Find the student by name and selected class ID
+        // Note: This relies on matching names. For a robust system, use a unique ID for removal.
+        const studentsRef = db.collection('students').doc(selectedClassId).collection('students');
+        const querySnapshot = await studentsRef.where('name', '==', studentName).limit(1).get();
 
-    // Clear the input field after attempting removal
-    studentNameInput.value = '';
+        if (querySnapshot.empty) {
+            removeStudentMessageSpan.textContent = `Student "${studentName}" not found in ${document.getElementById('selectedClassName').textContent}. Please ensure the name is exact.`;
+            return;
+        }
+
+        const studentDoc = querySnapshot.docs[0];
+        const studentId = studentDoc.id; // Get the Firestore auto-generated ID
+        const studentData = studentDoc.data();
+
+        // Confirm with the user, showing roll number for clarity
+        if (confirm(`WARNING: You are about to permanently remove ${studentData.name} (Roll: ${studentData.roll}) from ${document.getElementById('selectedClassName').textContent}. This action will delete their profile and all attendance records for this class. Are you sure?`)) {
+            await removeStudentPermanentlyById(studentId); // Call the core removal function
+            studentNameInput.value = ''; // Clear input field
+        } else {
+            removeStudentMessageSpan.textContent = 'Student removal cancelled.';
+            setTimeout(() => removeStudentMessageSpan.textContent = '', 3000);
+        }
+
+    } catch (error) {
+        console.error("Error finding student by name for removal:", error);
+        removeStudentMessageSpan.textContent = 'Error finding student for removal. Check console.';
+    }
 }
