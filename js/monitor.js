@@ -6,72 +6,110 @@ let selectedDate = null; // Stores the selected date in YYYY-MM-DD format
 let studentsData = []; // Stores the array of student objects currently loaded for the selected class
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Cache DOM elements
-    const attendanceDateMonitorInput = document.getElementById('attendanceDateMonitor');
-    const loadAttendanceBtn = document.getElementById('loadAttendanceBtn');
-    const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
-    const addStudentBtn = document.getElementById('addStudentBtn');
-    const removeStudentByNameBtn = document.getElementById('removeStudentByNameBtn');
-    const classButtonsContainer = document.getElementById('classButtonsContainer');
-    const monitorAttendanceTableBody = document.getElementById('monitorAttendanceTableBody');
-    const selectedClassNameSpan = document.getElementById('selectedClassName');
-    const displayDateSpan = document.getElementById('displayDate');
-    const attendanceMessageSpan = document.getElementById('attendanceMessage');
-    const addStudentMessageSpan = document.getElementById('addStudentMessage');
-    const removeStudentMessageSpan = document.getElementById('removeStudentMessage');
+    // --- Password Gate Logic ---
+    const passwordGate = document.getElementById('passwordGate');
+    const monitorPasswordInput = document.getElementById('monitorPassword');
+    const enterMonitorBtn = document.getElementById('enterMonitorBtn');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const monitorContent = document.getElementById('monitorContent'); // The main content div
 
-    // Set default date to today
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    attendanceDateMonitorInput.value = `${yyyy}-${mm}-${dd}`;
-    selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate
+    const CORRECT_PASSWORD = "19972010"; // Hardcoded password
 
-    // Load class buttons initially
-    loadClasses();
+    function checkPassword() {
+        if (monitorPasswordInput.value === CORRECT_PASSWORD) {
+            passwordGate.classList.add('hidden'); // Hide password gate
+            monitorContent.classList.remove('hidden'); // Show main content
+            passwordMessage.textContent = ''; // Clear any previous message
+            // Proceed with loading dashboard content after successful login
+            initializeMonitorDashboard();
+        } else {
+            passwordMessage.textContent = 'Incorrect password. Please try again.';
+            monitorPasswordInput.value = ''; // Clear input
+        }
+    }
 
-    // --- Event Listeners ---
-    loadAttendanceBtn.addEventListener('click', loadAttendanceForSelectedClassAndDate);
-    attendanceDateMonitorInput.addEventListener('change', (event) => {
-        selectedDate = event.target.value;
-        loadAttendanceForSelectedClassAndDate(); // Reload attendance when date changes
-    });
-    saveAttendanceBtn.addEventListener('click', saveAttendance);
-    addStudentBtn.addEventListener('click', addStudent);
-    removeStudentByNameBtn.addEventListener('click', removeStudentPermanentlyByName);
-
-    // Event delegation for class selection buttons
-    classButtonsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('class-button-monitor')) {
-            // Remove 'selected' class from all buttons
-            document.querySelectorAll('.class-button-monitor').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            // Add 'selected' class to the clicked button
-            e.target.classList.add('selected');
-            selectedClassId = e.target.dataset.classId;
-            selectedClassNameSpan.textContent = e.target.textContent; // Update display
-            loadAttendanceForSelectedClassAndDate(); // Load attendance for the newly selected class
+    enterMonitorBtn.addEventListener('click', checkPassword);
+    monitorPasswordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            checkPassword();
         }
     });
 
-    // Event delegation for 'Quick Remove' student buttons in table
-    monitorAttendanceTableBody.addEventListener('click', async (e) => {
-        if (e.target.closest('.remove-student-btn')) { // Use closest to handle clicks on icon inside button
-            const button = e.target.closest('.remove-student-btn');
-            const studentId = button.dataset.studentId;
-            // Confirm with user before quick removal
-            if (confirm("Are you sure you want to permanently remove this student from the class and all their attendance records? This action cannot be undone.")) {
-                await removeStudentPermanentlyById(studentId);
+    // If you want the monitor page to start with password gate visible:
+    passwordGate.classList.remove('hidden'); // Ensure it's visible initially
+    monitorContent.classList.add('hidden'); // Ensure main content is hidden initially
+
+    // Place all your existing monitor dashboard initialization logic inside a function
+    // that gets called ONLY after successful password entry.
+    function initializeMonitorDashboard() {
+        // Cache DOM elements (these should be within this function or globally accessible after content is visible)
+        const attendanceDateMonitorInput = document.getElementById('attendanceDateMonitor');
+        const loadAttendanceBtn = document.getElementById('loadAttendanceBtn');
+        const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        const removeStudentByNameBtn = document.getElementById('removeStudentByNameBtn');
+        const classButtonsContainer = document.getElementById('classButtonsContainer');
+        const monitorAttendanceTableBody = document.getElementById('monitorAttendanceTableBody');
+        const selectedClassNameSpan = document.getElementById('selectedClassName');
+        const displayDateSpan = document.getElementById('displayDate');
+        const attendanceMessageSpan = document.getElementById('attendanceMessage');
+        const addStudentMessageSpan = document.getElementById('addStudentMessage');
+        const removeStudentMessageSpan = document.getElementById('removeStudentMessage');
+
+        // Set default date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        attendanceDateMonitorInput.value = `${yyyy}-${mm}-${dd}`;
+        selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate
+
+        // Load class buttons initially
+        loadClasses();
+
+        // --- Event Listeners ---
+        loadAttendanceBtn.addEventListener('click', loadAttendanceForSelectedClassAndDate);
+        attendanceDateMonitorInput.addEventListener('change', (event) => {
+            selectedDate = event.target.value;
+            loadAttendanceForSelectedClassAndDate(); // Reload attendance when date changes
+        });
+        saveAttendanceBtn.addEventListener('click', saveAttendance);
+        addStudentBtn.addEventListener('click', addStudent);
+        removeStudentByNameBtn.addEventListener('click', removeStudentPermanentlyByName);
+
+        // Event delegation for class selection buttons
+        classButtonsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('class-button-monitor')) {
+                // Remove 'selected' class from all buttons
+                document.querySelectorAll('.class-button-monitor').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Add 'selected' class to the clicked button
+                e.target.classList.add('selected');
+                selectedClassId = e.target.dataset.classId;
+                selectedClassNameSpan.textContent = e.target.textContent; // Update display
+                loadAttendanceForSelectedClassAndDate(); // Load attendance for the newly selected class
             }
-        }
-    });
+        });
 
-    // Initial display of the selected class and date
-    selectedClassNameSpan.textContent = '[No Class Selected]';
-    displayDateSpan.textContent = new Date(selectedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-});
+        // Event delegation for 'Quick Remove' student buttons in table
+        monitorAttendanceTableBody.addEventListener('click', async (e) => {
+            if (e.target.closest('.remove-student-btn')) { // Use closest to handle clicks on icon inside button
+                const button = e.target.closest('.remove-student-btn');
+                const studentId = button.dataset.studentId;
+                // Confirm with user before quick removal
+                if (confirm("Are you sure you want to permanently remove this student from the class and all their attendance records? This action cannot be undone.")) {
+                    await removeStudentPermanentlyById(studentId);
+                }
+            }
+        });
+
+        // Initial display of the selected class and date
+        selectedClassNameSpan.textContent = '[No Class Selected]';
+        displayDateSpan.textContent = new Date(selectedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    // END of initializeMonitorDashboard function
+}); // End of DOMContentLoaded
 
 // --- Class Loading Functions ---
 async function loadClasses() {
