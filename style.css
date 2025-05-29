@@ -128,11 +128,8 @@ header {
     margin-bottom: 0; /* Override default h1 margin */
 }
 
-.header-buttons {
-    display: flex;
-    gap: 1rem;
-}
-
+/* .header-buttons is now removed from HTML, so these styles are less relevant */
+/* However, .btn styles are reused by the modal buttons, so they are kept */
 .btn {
     padding: 0.6rem 1.4rem;
     border: none;
@@ -149,12 +146,12 @@ header {
     gap: 0.5rem;
 }
 
-.btn-login {
+.btn-login { /* These specific color styles are for modal buttons now */
     background-color: var(--primary-red);
     color: white;
 }
 
-.btn-register {
+.btn-register { /* These specific color styles are for modal buttons now */
     background-color: var(--primary-blue);
     color: white;
 }
@@ -212,9 +209,10 @@ header {
 }
 
 @media (max-width: 768px) {
-    .header-buttons {
-        display: none; /* Hide desktop buttons on smaller screens */
-    }
+    /* .header-buttons is now removed entirely from HTML, so these are redundant */
+    /* .header-buttons {
+        display: none;
+    } */
 
     .menu-toggle {
         display: block; /* Show menu toggle button */
@@ -603,7 +601,7 @@ input[type="password"]:focus {
     color: #777;
 }
 
-/* --- Modal Overlay (from provided code) --- */
+/* --- Modal Overlay --- */
 .modal-overlay {
     position: fixed;
     top: 0;
