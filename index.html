@@ -3,39 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Attendance System - Welcome</title>
+    <title>Caring Heart - Attendance System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <meta name="description" content="Welcome to the School Attendance System. Streamlining student record keeping for a better educational experience.">
-    <meta name="keywords" content="school, attendance, system, students, monitor, education, Firebase">
+    <meta name="description" content="Welcome to the Caring Heart School Attendance System. Streamline student attendance tracking and management.">
+    <meta name="keywords" content="school, attendance, system, students, monitor, education, Firebase, management, Caring Heart">
+    <meta name="author" content="Your Name or Organization">
 </head>
 <body>
+    <header>
+        <div class="header-brand">
+            <img src="img/slazzer-edit-image-removebg-preview (1)_preview_rev_1.png" alt="Caring Heart Logo" class="header-logo" />
+            <h1 class="brand-title">Caring Heart</h1>
+        </div>
+        <div class="header-buttons">
+            <a href="login.html" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="login.html" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleDropdown()">
+            <i class="fas fa-bars"></i> </button>
+        <div class="dropdown-panel" id="dropdownPanel">
+            <a href="login.html" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="login.html" class="btn btn-register"><i class="fas fa-user-plus"></i> Register</a>
+        </div>
+    </header>
+
     <div class="container welcome-container">
-        <header class="system-header">
-            <h1 class="fade-in">Welcome to the <span class="highlight">Attendance System</span></h1>
-            <p class="tagline fade-in delay-1">Streamlining student record keeping for a better educational experience.</p>
-        </header>
+        <section class="system-introduction fade-in delay-0">
+            <h2 class="sub-heading">Welcome to the Attendance System</h2>
+            <p class="tagline">Streamlining student record keeping for a better educational experience.</p>
+        </section>
 
         <div class="main-sections fade-in delay-2">
-            <a href="students.html" class="section-button glow-on-hover">
+            <a href="students.html" class="section-button glow-on-hover" role="button" aria-label="Go to Student Portal">
                 <i class="fas fa-user-graduate icon"></i>
                 <span class="button-text">Student Portal</span>
                 <p class="button-description">View attendance for your class.</p>
             </a>
-            <a href="monitor.html" class="section-button glow-on-hover">
+            <button id="monitorBtn" class="section-button glow-on-hover" role="button" aria-label="Go to Monitor Dashboard">
                 <i class="fas fa-chalkboard-teacher icon"></i>
                 <span class="button-text">Monitor Dashboard</span>
                 <p class="button-description">Manage and update attendance records.</p>
-            </a>
+            </button>
         </div>
 
-        <footer class="system-footer fade-in delay-3">
-            <p>&copy; <span id="current-year"></span> School Attendance System. All rights reserved.</p>
-            <p>Developed with ❤️ and Firebase.</p>
+        <footer class="system-footer fade-in delay-3" role="contentinfo">
+            <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
+            <p>Powered by Firebase.</p>
         </footer>
     </div>
+
+    <div id="monitorPasswordPrompt" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Enter Monitor Password</h2>
+            <label for="monitorPasswordInput" class="sr-only">Password</label>
+            <input type="password" id="monitorPasswordInput" placeholder="Password" autocomplete="off" />
+            <button id="submitMonitorPassword" class="btn btn-primary">Submit</button>
+            <button id="cancelMonitorPassword" class="btn btn-register">Cancel</button>
+            <p id="monitorPasswordError" class="error-message"></p>
+        </div>
+    </div>
+
     <script>
+        // Set current year in footer
         document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Toggle dropdown menu for mobile (from provided code)
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownPanel');
+            dropdown.classList.toggle('show');
+            // Accessibility: Toggle aria-expanded
+            const menuToggleBtn = document.querySelector('.menu-toggle');
+            const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+            menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
+        }
+
+        // Monitor button logic with password prompt (adapted from provided code)
+        const monitorBtn = document.getElementById('monitorBtn');
+        const modal = document.getElementById('monitorPasswordPrompt');
+        const submitBtn = document.getElementById('submitMonitorPassword');
+        const cancelBtn = document.getElementById('cancelMonitorPassword');
+        const passwordInput = document.getElementById('monitorPasswordInput');
+        const errorMessage = document.getElementById('monitorPasswordError');
+
+        monitorBtn.addEventListener('click', () => {
+            errorMessage.textContent = '';
+            passwordInput.value = '';
+            modal.style.display = 'flex';
+            passwordInput.focus();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        submitBtn.addEventListener('click', () => {
+            const correctPassword = '19972010'; // <-- CHANGE THIS TO YOUR REAL PASSWORD FOR SECURITY
+            if (passwordInput.value === correctPassword) {
+                modal.style.display = 'none';
+                window.location.href = 'monitor.html'; // Direct to our existing monitor.html
+            } else {
+                errorMessage.textContent = 'Incorrect password. Please try again.';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        // Optional: close modal if clicking outside content
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Optional: submit on Enter key in password input
+        passwordInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
     </script>
 </body>
 </html>
