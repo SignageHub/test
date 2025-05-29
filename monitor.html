@@ -55,7 +55,7 @@
                         <tr>
                             <th>Student Name</th>
                             <th>Status</th>
-                            <th>Actions</th> </tr>
+                            <th>Quick Remove</th> </tr>
                     </thead>
                     <tbody id="attendanceTableBody">
                         </tbody>
@@ -65,14 +65,27 @@
             <p id="attendanceMessage" class="info-text"></p>
         </section>
 
-        <section class="add-student-section">
-            <h3>Add New Student</h3>
-            <div class="input-group">
-                <label for="newStudentName" class="sr-only">New Student Name</label>
-                <input type="text" id="newStudentName" placeholder="Student Name">
-                <button class="action-button add-button" id="addStudentBtn">Add Student</button>
+        <section class="add-remove-student-section">
+            <div class="section-column">
+                <h3>Add New Student</h3>
+                <div class="input-group">
+                    <label for="newStudentName" class="sr-only">New Student Name</label>
+                    <input type="text" id="newStudentName" placeholder="Student Name">
+                    <button class="action-button add-button" id="addStudentBtn">Add Student</button>
+                </div>
+                <p id="addStudentMessage" class="info-text"></p>
             </div>
-            <p id="addStudentMessage" class="info-text"></p>
+
+            <div class="section-column">
+                <h3>Permanently Remove Student</h3>
+                <p class="small-text warning-text"><strong>WARNING:</strong> This action is irreversible.</p>
+                <div class="input-group">
+                    <label for="studentToRemoveName" class="sr-only">Student Name to Remove</label>
+                    <input type="text" id="studentToRemoveName" placeholder="Student Name to Remove">
+                    <button class="action-button primary-button" id="removeStudentPermanentlyBtn">Remove Student</button>
+                </div>
+                <p id="removeStudentMessage" class="info-text"></p>
+            </div>
         </section>
 
         <section class="navigation-buttons">
