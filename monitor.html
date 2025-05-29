@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Dashboard - Caring Heart</title>
+    <title>Caring Heart - Monitor Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <meta name="description" content="Monitor and manage student attendance records for Caring Heart school.">
-    <meta name="keywords" content="school, attendance, monitor, management, dashboard, Firebase, Caring Heart">
-    <meta name="author" content="Your Name or Organization">
-</head>
+    </head>
 <body>
     <header>
         <div class="header-brand">
@@ -23,77 +20,87 @@
             </div>
     </header>
 
-    <div class="container portal-container">
+    <div class="container">
         <section class="portal-header">
             <h2>Monitor Dashboard</h2>
-            <p class="sub-heading">Manage student attendance records for your classes.</p>
+            <p class="sub-heading">Manage student attendance records and add/remove students.</p>
         </section>
 
         <section class="class-selection-section">
-            <h3>Select a Class</h3>
-            <div class="class-selection" id="classSelection">
-                <button class="class-button-monitor" data-class-id="ClassA">Class A</button>
-                <button class="class-button-monitor" data-class-id="ClassB">Class B</button>
-                <button class="class-button-monitor" data-class-id="ClassC">Class C</button>
-            </div>
+            <h2>Select Class</h2>
+            <div class="class-selection" id="classButtonsContainer">
+                </div>
+            <p class="info-text">Select a class to view and manage its students and attendance.</p>
         </section>
 
         <section class="date-selection-section">
-            <h3>Select Date for Attendance</h3>
+            <h2>Select Date for Attendance Management</h2>
             <div class="input-group">
-                <label for="attendanceDate" class="sr-only">Attendance Date</label>
-                <input type="date" id="attendanceDate">
-                <button class="action-button primary-button" id="loadAttendanceBtn">Load Attendance</button>
+                <label for="attendanceDateMonitor" class="sr-only">Attendance Date</label>
+                <input type="date" id="attendanceDateMonitor" />
+                <button id="loadAttendanceBtn" class="action-button primary-button">
+                    <i class="fas fa-calendar-check icon"></i> Load Attendance
+                </button>
             </div>
         </section>
 
-        <section class="attendance-table-section">
-            <h3>Attendance for <span id="selectedClassName"></span> on <span id="displayDate"></span></h3>
+        <section class="attendance-management-section">
+            <h2>Attendance Management</h2>
             <div class="table-responsive">
-                <table class="data-table" id="attendanceTable">
+                <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Roll Number</th>
                             <th>Student Name</th>
                             <th>Status</th>
-                            <th>Quick Remove</th> </tr>
+                        </tr>
                     </thead>
-                    <tbody id="attendanceTableBody">
-                        </tbody>
+                    <tbody id="monitorAttendanceTableBody">
+                        <tr><td colspan="3">Select a class and date to manage attendance.</td></tr>
+                    </tbody>
                 </table>
             </div>
-            <button class="action-button save-button" id="saveAttendanceBtn" style="display:none;">Save Attendance</button>
-            <p id="attendanceMessage" class="info-text"></p>
+            <button id="saveAttendanceBtn" class="action-button save-button" style="margin-top: 20px;">
+                <i class="fas fa-save icon"></i> Save Changes
+            </button>
+            <p class="info-text small-text">
+                <i class="fas fa-info-circle info-icon"></i> Update student status and click 'Save Changes'.
+            </p>
         </section>
 
         <section class="add-remove-student-section">
             <div class="section-column">
                 <h3>Add New Student</h3>
+                <p class="warning-text">Adding students directly here is for mock-up. In a real system, this would be more robust.</p>
                 <div class="input-group">
+                    <label for="newStudentRoll" class="sr-only">New Student Roll No.</label>
+                    <input type="text" id="newStudentRoll" placeholder="Roll Number (e.g., 016)" />
                     <label for="newStudentName" class="sr-only">New Student Name</label>
-                    <input type="text" id="newStudentName" placeholder="Student Name">
-                    <button class="action-button add-button" id="addStudentBtn">Add Student</button>
+                    <input type="text" id="newStudentName" placeholder="Student Name" />
+                    <button id="addStudentBtn" class="action-button add-button">
+                        <i class="fas fa-user-plus icon"></i> Add Student
+                    </button>
                 </div>
-                <p id="addStudentMessage" class="info-text"></p>
             </div>
-
             <div class="section-column">
-                <h3>Permanently Remove Student</h3>
-                <p class="small-text warning-text"><strong>WARNING:</strong> This action is irreversible.</p>
+                <h3>Remove Student</h3>
+                <p class="warning-text">Removing students directly here is for mock-up. Be careful!</p>
                 <div class="input-group">
-                    <label for="studentToRemoveName" class="sr-only">Student Name to Remove</label>
-                    <input type="text" id="studentToRemoveName" placeholder="Student Name to Remove">
-                    <button class="action-button primary-button" id="removeStudentPermanentlyBtn">Remove Student</button>
+                    <label for="removeStudentRoll" class="sr-only">Remove Student Roll No.</label>
+                    <input type="text" id="removeStudentRoll" placeholder="Roll Number to Remove" />
+                    <button id="removeStudentBtn" class="action-button btn-login">
+                        <i class="fas fa-user-minus icon"></i> Remove Student
+                    </button>
                 </div>
-                <p id="removeStudentMessage" class="info-text"></p>
             </div>
         </section>
 
-        <section class="navigation-buttons">
-            <a href="index.html" class="small-button section-button glow-on-hover" role="button" aria-label="Go back to Home">
+        <div class="navigation-buttons">
+            <a href="index.html" class="section-button small-button">
                 <i class="fas fa-home icon"></i>
                 <span class="button-text">Home</span>
             </a>
-        </section>
+        </div>
 
         <footer class="system-footer" role="contentinfo">
             <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
@@ -101,16 +108,11 @@
         </footer>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/monitor.js"></script>
-
     <script>
-        // Set current year in footer
+        // Set current year in footer dynamically
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // Toggle dropdown menu for mobile
+        // Toggle dropdown menu for mobile/smaller screens
         function toggleDropdown() {
             const dropdown = document.getElementById('dropdownPanel');
             dropdown.classList.toggle('show');
@@ -118,6 +120,416 @@
             const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
         }
+
+        // --- Class Selection Logic ---
+        const classButtonsContainer = document.getElementById('classButtonsContainer');
+        // CORRECTED: Class names from S.1 to S.6
+        const defaultClasses = ['S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6'];
+        let selectedClass = null; // To store the currently selected class
+        let selectedDateMonitor = null; // To store the currently selected date for monitor
+
+        function loadClassButtons(classes) {
+            classButtonsContainer.innerHTML = ''; // Clear existing buttons
+            classes.forEach(className => {
+                const button = document.createElement('button');
+                button.classList.add('class-button-monitor'); // Unique class for monitor page
+                button.textContent = className;
+                button.setAttribute('data-class', className);
+                button.addEventListener('click', () => {
+                    // Remove 'selected' from previously selected button
+                    if (selectedClass) {
+                        const prevSelected = document.querySelector(`.class-button-monitor[data-class="${selectedClass}"]`);
+                        if (prevSelected) {
+                            prevSelected.classList.remove('selected');
+                        }
+                    }
+                    // Add 'selected' to the clicked button
+                    button.classList.add('selected');
+                    selectedClass = className; // Update selected class
+                    console.log('Monitor Selected Class:', selectedClass);
+                    // Load attendance if a date is also selected
+                    if (selectedDateMonitor) {
+                        loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+                    } else {
+                        // Optionally, alert user to select a date
+                    }
+                });
+                classButtonsContainer.appendChild(button);
+            });
+        }
+
+        // Initialize with default classes (this will run if Firebase is not enabled or fails)
+        loadClassButtons(defaultClasses);
+
+        // --- Date Selection and Load Attendance Button Logic ---
+        const attendanceDateMonitorInput = document.getElementById('attendanceDateMonitor');
+        const loadAttendanceBtn = document.getElementById('loadAttendanceBtn');
+        const monitorAttendanceTableBody = document.getElementById('monitorAttendanceTableBody');
+
+        // Set default date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const dd = String(today.getDate()).padStart(2, '0');
+        attendanceDateMonitorInput.value = `${yyyy}-${mm}-${dd}`;
+        selectedDateMonitor = `${yyyy}-${mm}-${dd}`; // Initialize selectedDateMonitor
+
+        attendanceDateMonitorInput.addEventListener('change', (event) => {
+            selectedDateMonitor = event.target.value;
+            console.log('Monitor Selected Date:', selectedDateMonitor);
+            if (selectedClass) {
+                loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+            }
+        });
+
+        loadAttendanceBtn.addEventListener('click', () => {
+            if (!selectedClass) {
+                alert('Please select a class first.');
+                return;
+            }
+            if (!selectedDateMonitor) {
+                alert('Please select a date.');
+                return;
+            }
+            loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+        });
+
+        // --- Load Attendance for Management (Mock Data for now) ---
+        function loadAttendanceForManagement(className, date) {
+            monitorAttendanceTableBody.innerHTML = ''; // Clear previous data
+
+            if (!className || !date) {
+                monitorAttendanceTableBody.innerHTML = '<tr><td colspan="3">Select a class and date to manage attendance.</td></tr>';
+                return;
+            }
+
+            // Mock data - Replace with Firebase data fetching
+            const mockStudentsWithAttendance = {
+                'S.1': [
+                    { roll: '001', name: 'Alice Smith', status: 'present' },
+                    { roll: '002', name: 'Bob Johnson', status: 'absent' },
+                    { roll: '003', name: 'Charlie Brown', status: 'present' }
+                ],
+                'S.2': [
+                    { roll: '004', name: 'Diana Prince', status: 'present' },
+                    { roll: '005', name: 'Clark Kent', status: 'present' }
+                ],
+                'S.3': [
+                    { roll: '006', name: 'Bruce Wayne', status: 'absent' },
+                    { roll: '007', name: 'Selina Kyle', status: 'present' }
+                ],
+                'S.4': [
+                    { roll: '008', name: 'Peter Parker', status: 'present' },
+                    { roll: '009', name: 'Mary Jane', status: 'absent' }
+                ],
+                'S.5': [
+                    { roll: '010', name: 'Tony Stark', status: 'present' },
+                    { roll: '011', name: 'Natasha Romanoff', status: 'present' }
+                ],
+                'S.6': [
+                    { roll: '012', name: 'Steve Rogers', status: 'absent' },
+                    { roll: '013', name: 'Bucky Barnes', status: 'present' }
+                ]
+            };
+
+            const studentsInClass = mockStudentsWithAttendance[className] || [];
+
+            if (studentsInClass.length === 0) {
+                monitorAttendanceTableBody.innerHTML = `<tr><td colspan="3">No students found for ${className}.</td></tr>`;
+                return;
+            }
+
+            studentsInClass.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.roll}</td>
+                    <td>${student.name}</td>
+                    <td>
+                        <div class="monitor-attendance-status">
+                            <input type="radio" id="present-${student.roll}" name="status-${student.roll}" value="present" ${student.status === 'present' ? 'checked' : ''}>
+                            <label for="present-${student.roll}">Present</label>
+
+                            <input type="radio" id="absent-${student.roll}" name="status-${student.roll}" value="absent" ${student.status === 'absent' ? 'checked' : ''}>
+                            <label for="absent-${student.roll}">Absent</label>
+                        </div>
+                    </td>
+                `;
+                monitorAttendanceTableBody.appendChild(row);
+            });
+
+            // --- Firebase Integration (Uncomment and configure if using Firebase) ---
+            /*
+            if (firebaseApp) {
+                const db = firebase.firestore();
+                // To display all students for a class first
+                db.collection('classes').doc(className).collection('students').get()
+                    .then(studentsSnapshot => {
+                        if (studentsSnapshot.empty) {
+                            monitorAttendanceTableBody.innerHTML = `<tr><td colspan="3">No students registered for ${className}.</td></tr>`;
+                            return;
+                        }
+
+                        const studentPromises = [];
+                        studentsSnapshot.forEach(studentDoc => {
+                            const studentData = studentDoc.data();
+                            // Now try to get their attendance for the specific date
+                            const attendancePromise = db.collection('attendance')
+                                .doc(className).collection(date).doc(studentDoc.id).get()
+                                .then(attendanceDoc => {
+                                    const status = attendanceDoc.exists ? attendanceDoc.data().status : 'n/a'; // 'n/a' or default to absent
+                                    return {
+                                        roll: studentData.roll || studentDoc.id, // Use roll if available, else doc id
+                                        name: studentData.name,
+                                        status: status
+                                    };
+                                });
+                            studentPromises.push(attendancePromise);
+                        });
+
+                        Promise.all(studentPromises).then(studentsWithStatus => {
+                            monitorAttendanceTableBody.innerHTML = ''; // Clear table
+                            studentsWithStatus.sort((a, b) => a.roll.localeCompare(b.roll)); // Sort by roll number
+                            studentsWithStatus.forEach(student => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${student.roll}</td>
+                                    <td>${student.name}</td>
+                                    <td>
+                                        <div class="monitor-attendance-status">
+                                            <input type="radio" id="present-${student.roll}" name="status-${student.roll}" value="present" ${student.status === 'present' ? 'checked' : ''}>
+                                            <label for="present-${student.roll}">Present</label>
+
+                                            <input type="radio" id="absent-${student.roll}" name="status-${student.roll}" value="absent" ${student.status === 'absent' ? 'checked' : ''}>
+                                            <label for="absent-${student.roll}">Absent</label>
+                                        </div>
+                                    </td>
+                                `;
+                                monitorAttendanceTableBody.appendChild(row);
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error loading students or attendance: ", error);
+                        monitorAttendanceTableBody.innerHTML = `<tr><td colspan="3">Error loading student or attendance data.</td></tr>`;
+                    });
+            } else {
+                console.warn("Firebase not initialized. Using mock data for attendance management.");
+            }
+            */
+        }
+
+        // --- Save Attendance Changes ---
+        const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+
+        saveAttendanceBtn.addEventListener('click', () => {
+            if (!selectedClass || !selectedDateMonitor) {
+                alert('Please select a class and date before saving.');
+                return;
+            }
+
+            const updatedAttendance = [];
+            const rows = monitorAttendanceTableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const roll = row.children[0].textContent;
+                const name = row.children[1].textContent;
+                const statusInput = row.querySelector(`input[name="status-${roll}"]:checked`);
+                const status = statusInput ? statusInput.value : 'n/a'; // Default to n/a if not selected
+
+                updatedAttendance.push({ roll, name, status });
+            });
+
+            console.log('Saving Attendance:', updatedAttendance);
+
+            // Mock saving - Replace with Firebase update logic
+            alert(`Attendance for ${selectedClass} on ${selectedDateMonitor} saved (mock operation)! Check console for data.`);
+
+            // Clear fields
+            newStudentRollInput.value = '';
+            newStudentNameInput.value = '';
+
+            // Optionally, refresh attendance table if adding to the currently viewed class
+            if (selectedDateMonitor) {
+                loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+            }
+
+            // --- Firebase Integration (Uncomment and configure if using Firebase) ---
+            /*
+            if (firebaseApp) {
+                const db = firebase.firestore();
+                const batch = db.batch(); // Use a batch for multiple writes
+
+                updatedAttendance.forEach(student => {
+                    // Path: attendance/CLASS_NAME/DATE/STUDENT_ROLL
+                    const attendanceRef = db.collection('attendance')
+                                            .doc(selectedClass)
+                                            .collection(selectedDateMonitor)
+                                            .doc(student.roll); // Use student roll as doc ID
+
+                    batch.set(attendanceRef, {
+                        name: student.name,
+                        status: student.status,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Optional: add timestamp
+                    }, { merge: true }); // Use merge to avoid overwriting other fields
+                });
+
+                batch.commit().then(() => {
+                    alert('Attendance changes saved successfully to Firebase!');
+                    console.log('Firebase batch commit successful!');
+                }).catch(error => {
+                    console.error('Error saving attendance changes to Firebase:', error);
+                    alert('Error saving attendance changes.');
+                });
+            } else {
+                console.warn("Firebase not initialized. Cannot save to Firebase.");
+            }
+            */
+        });
+
+
+        // --- Add Student Logic ---
+        const newStudentRollInput = document.getElementById('newStudentRoll');
+        const newStudentNameInput = document.getElementById('newStudentName');
+        const addStudentBtn = document.getElementById('addStudentBtn');
+
+        addStudentBtn.addEventListener('click', () => {
+            if (!selectedClass) {
+                alert('Please select a class first to add a student.');
+                return;
+            }
+
+            const roll = newStudentRollInput.value.trim();
+            const name = newStudentNameInput.value.trim();
+
+            if (!roll || !name) {
+                alert('Please enter both roll number and student name.');
+                return;
+            }
+
+            // Mock add student - Replace with Firebase add logic
+            alert(`Student ${name} (Roll: ${roll}) added to ${selectedClass} (mock operation)!`);
+            console.log(`Mock Add: Class: ${selectedClass}, Roll: ${roll}, Name: ${name}`);
+
+            // Clear fields
+            newStudentRollInput.value = '';
+            newStudentNameInput.value = '';
+
+            // Optionally, refresh attendance table if adding to the currently viewed class
+            if (selectedDateMonitor) {
+                loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+            }
+
+            // --- Firebase Integration (Uncomment and configure if using Firebase) ---
+            /*
+            if (firebaseApp) {
+                const db = firebase.firestore();
+                // Path: classes/CLASS_NAME/students/STUDENT_ROLL
+                db.collection('classes').doc(selectedClass).collection('students').doc(roll).set({
+                    name: name,
+                    roll: roll // Store roll number explicitly
+                }).then(() => {
+                    alert(`Student ${name} (Roll: ${roll}) added successfully to Firebase!`);
+                    console.log('Student added to Firebase:', { class: selectedClass, roll, name });
+                    newStudentRollInput.value = '';
+                    newStudentNameInput.value = '';
+                    if (selectedDateMonitor) { // Refresh the table if viewing attendance for current class/date
+                        loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+                    }
+                }).catch(error => {
+                    console.error('Error adding student to Firebase:', error);
+                    alert('Error adding student.');
+                });
+            } else {
+                console.warn("Firebase not initialized. Cannot add student to Firebase.");
+            }
+            */
+        });
+
+        // --- Remove Student Logic ---
+        const removeStudentRollInput = document.getElementById('removeStudentRoll');
+        const removeStudentBtn = document.getElementById('removeStudentBtn');
+
+        removeStudentBtn.addEventListener('click', () => {
+            if (!selectedClass) {
+                alert('Please select a class first to remove a student.');
+                return;
+            }
+
+            const rollToRemove = removeStudentRollInput.value.trim();
+
+            if (!rollToRemove) {
+                alert('Please enter the roll number of the student to remove.');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to remove student with Roll Number: ${rollToRemove} from ${selectedClass}? This action is irreversible.`)) {
+                // Mock remove student - Replace with Firebase remove logic
+                alert(`Student with Roll Number ${rollToRemove} removed from ${selectedClass} (mock operation)!`);
+                console.log(`Mock Remove: Class: ${selectedClass}, Roll: ${rollToRemove}`);
+                removeStudentRollInput.value = '';
+
+                // Optionally, refresh attendance table
+                if (selectedDateMonitor) {
+                    loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+                }
+
+                // --- Firebase Integration (Uncomment and configure if using Firebase) ---
+                /*
+                if (firebaseApp) {
+                    const db = firebase.firestore();
+                    // Path: classes/CLASS_NAME/students/STUDENT_ROLL
+                    db.collection('classes').doc(selectedClass).collection('students').doc(rollToRemove).delete().then(() => {
+                        alert(`Student with Roll Number ${rollToRemove} removed successfully from Firebase!`);
+                        console.log('Student removed from Firebase:', { class: selectedClass, roll: rollToRemove });
+                        removeStudentRollInput.value = '';
+                        // Also, consider removing their attendance records if desired,
+                        // this would require querying 'attendance' collection for this student's roll
+                        // across various dates within the class.
+                        if (selectedDateMonitor) {
+                            loadAttendanceForManagement(selectedClass, selectedDateMonitor); // Refresh the table
+                        }
+                    }).catch(error => {
+                        console.error('Error removing student from Firebase:', error);
+                        alert('Error removing student.');
+                    });
+                } else {
+                    console.warn("Firebase not initialized. Cannot remove student from Firebase.");
+                }
+                */
+            }
+        });
+
+        // Initial load of attendance for the currently selected class and date when page loads
+        // This will attempt to load based on default selectedDateMonitor, and no selectedClass initially.
+        // It will effectively show the "Select a class and date" message.
+        // If you want it to load immediately with 'S.1' for example, uncomment the next line:
+        // selectedClass = 'S.1'; loadAttendanceForManagement(selectedClass, selectedDateMonitor);
+
+        // --- Firebase Class Loading (Uncomment and configure if using Firebase) ---
+        /*
+        if (firebaseApp) {
+            const db = firebase.firestore();
+            // Assuming you have a 'classes' collection with documents like { name: "S.1", order: 1 }
+            db.collection('classes').orderBy('order').get().then((snapshot) => {
+                if (!snapshot.empty) {
+                    const firebaseClasses = [];
+                    snapshot.forEach(doc => {
+                        firebaseClasses.push(doc.data().name); // Get the 'name' field
+                    });
+                    loadClassButtons(firebaseClasses);
+                } else {
+                    console.warn("No classes found in Firebase 'classes' collection. Loading default classes.");
+                    loadClassButtons(defaultClasses); // Fallback to default
+                }
+            }).catch(error => {
+                console.error("Error loading classes from Firebase:", error);
+                loadClassButtons(defaultClasses); // Fallback to default on error
+            });
+        } else {
+            console.warn("Firebase not initialized. Using default classes.");
+            // If Firebase is not initialized, defaultClasses will already be loaded by the call above.
+        }
+        */
     </script>
 </body>
 </html>
