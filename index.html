@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caring Heart - Attendance System</title>
+    <title>Caring Heart - Home</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <meta name="description" content="Welcome to the Caring Heart School Attendance System. Streamline student attendance tracking and management.">
-    <meta name="keywords" content="school, attendance, system, students, monitor, education, Firebase, management, Caring Heart">
-    <meta name="author" content="Your Name or Organization">
 </head>
 <body>
     <header>
@@ -23,47 +20,66 @@
             </div>
     </header>
 
-    <div class="container welcome-container">
-        <section class="system-introduction fade-in delay-0">
-            <h2 class="sub-heading">Welcome to the Attendance System</h2>
-            <p class="tagline">Streamlining student record keeping for a better educational experience.</p>
+    <div class="container">
+        <section class="hero-section">
+            <h2 class="hero-title">Welcome to Caring Heart Attendance System</h2>
+            <p class="hero-subtitle">Simplifying attendance management for students and monitors.</p>
         </section>
 
-        <div class="main-sections fade-in delay-2">
-            <a href="students.html" class="section-button glow-on-hover" role="button" aria-label="Go to Student Portal">
+        <section class="feature-buttons">
+            <a href="students.html" class="section-button">
                 <i class="fas fa-user-graduate icon"></i>
                 <span class="button-text">Student Portal</span>
-                <p class="button-description">View attendance for your class.</p>
+                <p class="button-description">View your attendance records by class and date.</p>
             </a>
-            <button id="monitorBtn" class="section-button glow-on-hover" role="button" aria-label="Go to Monitor Dashboard">
-                <i class="fas fa-chalkboard-teacher icon"></i>
+            <a href="monitor.html" class="section-button">
+                <i class="fas fa-user-tie icon"></i>
                 <span class="button-text">Monitor Dashboard</span>
-                <p class="button-description">Manage and update attendance records.</p>
-            </button>
-        </div>
+                <p class="button-description">Manage student attendance, add, and remove students.</p>
+            </a>
+        </section>
 
-        <footer class="system-footer fade-in delay-3" role="contentinfo">
+        <section class="how-to-use-section">
+            <h2>How to Use This System</h2>
+            <div class="use-instructions">
+                <div class="instruction-step">
+                    <h3>1. Initial Setup (Monitor)</h3>
+                    <p>As a monitor, ensure your Firebase project is linked in `js/firebase-init.js` and that `style.css` and the JavaScript files are correctly placed. You will need to populate your Firestore with initial classes (e.g., S.1, S.2, etc.) in the `classes` collection. Add students to each class via the Monitor Dashboard.</p>
+                </div>
+                <div class="instruction-step">
+                    <h3>2. Monitor Dashboard</h3>
+                    <p>
+                        <strong>Select Class & Date:</strong> Choose a class (e.g., S.1) and a date to view attendance records.
+                        <strong>Mark Attendance:</strong> For each student, select 'Present' or 'Absent'. Click 'Save Changes' to update the database.
+                        <strong>Add New Student:</strong> Enter a unique roll number and name for a new student, then click 'Add Student'.
+                        <strong>Remove Student:</strong> Use the trash icon next to a student's name for quick removal from a class, or use the "Permanently Remove Student" section to delete by name (be cautious, this is irreversible!).
+                    </p>
+                </div>
+                <div class="instruction-step">
+                    <h3>3. Student Portal</h3>
+                    <p>
+                        <strong>Select Your Class:</strong> Choose your class (e.g., S.1).
+                        <strong>Select Date:</strong> Pick the date for which you want to check attendance.
+                        <strong>View Attendance:</strong> Click 'View Attendance' to see your status for that day.
+                    </p>
+                </div>
+                <div class="instruction-step">
+                    <h3>4. Best Practices</h3>
+                    <p>Always refresh your browser if you encounter issues. Ensure network connectivity for real-time updates. For production, implement user authentication and stricter Firebase security rules.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="system-footer" role="contentinfo">
             <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
+            <p>Made with &hearts; by Nyola Gift.</p>
             <p>Powered by Firebase.</p>
         </footer>
     </div>
 
-    <div id="monitorPasswordPrompt" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Enter Monitor Password</h2>
-            <label for="monitorPasswordInput" class="sr-only">Password</label>
-            <input type="password" id="monitorPasswordInput" placeholder="Password" autocomplete="off" />
-            <button id="submitMonitorPassword" class="btn btn-primary">Submit</button>
-            <button id="cancelMonitorPassword" class="btn btn-register">Cancel</button>
-            <p id="monitorPasswordError" class="error-message"></p>
-        </div>
-    </div>
-
     <script>
-        // Set current year in footer dynamically
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // Toggle dropdown menu for mobile/smaller screens
         function toggleDropdown() {
             const dropdown = document.getElementById('dropdownPanel');
             dropdown.classList.toggle('show');
@@ -71,54 +87,6 @@
             const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
         }
-
-        // Monitor button logic with password prompt
-        const monitorBtn = document.getElementById('monitorBtn');
-        const modal = document.getElementById('monitorPasswordPrompt');
-        const submitBtn = document.getElementById('submitMonitorPassword');
-        const cancelBtn = document.getElementById('cancelMonitorPassword');
-        const passwordInput = document.getElementById('monitorPasswordInput');
-        const errorMessage = document.getElementById('monitorPasswordError');
-
-        // Event listener to show the modal when Monitor button is clicked
-        monitorBtn.addEventListener('click', () => {
-            errorMessage.textContent = ''; // Clear any previous error messages
-            passwordInput.value = ''; // Clear previous password input
-            modal.style.display = 'flex'; // Make the modal visible
-            passwordInput.focus(); // Focus on the password input field
-        });
-
-        // Event listener to hide the modal when Cancel button is clicked
-        cancelBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        // Event listener to handle password submission
-        submitBtn.addEventListener('click', () => {
-            const correctPassword = '19972010'; // <-- IMPORTANT: CHANGE THIS TO YOUR REAL PASSWORD FOR SECURITY
-            if (passwordInput.value === correctPassword) {
-                modal.style.display = 'none'; // Hide modal
-                window.location.href = 'monitor.html'; // Redirect to the monitor dashboard
-            } else {
-                errorMessage.textContent = 'Incorrect password. Please try again.'; // Display error
-                passwordInput.value = ''; // Clear input field
-                passwordInput.focus(); // Re-focus for another try
-            }
-        });
-
-        // Optional: Close modal if clicking outside the content area
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Optional: Submit password on Enter key press in the input field
-        passwordInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                submitBtn.click();
-            }
-        });
     </script>
 </body>
 </html>
