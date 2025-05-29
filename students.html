@@ -6,7 +6,7 @@
     <title>Caring Heart - Student Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
 <body>
     <header>
         <div class="header-brand">
@@ -45,7 +45,7 @@
         </section>
 
         <section class="attendance-table-section">
-            <h2>Attendance Records</h2>
+            <h2>Attendance Records for <span id="displayClass"></span> on <span id="displayDate"></span></h2>
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
@@ -74,11 +74,15 @@
 
         <footer class="system-footer" role="contentinfo">
             <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
+            <p>Made with &hearts; by Nyola Gift.</p>
             <p>Powered by Firebase.</p>
         </footer>
     </div>
 
-    <script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/students.js"></script> <script>
         // Set current year in footer dynamically
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
@@ -90,223 +94,6 @@
             const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
         }
-
-        // --- Class Selection Logic ---
-        const classButtonsContainer = document.getElementById('classButtonsContainer');
-        // CORRECTED: Class names from S.1 to S.6
-        const defaultClasses = ['S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6']; 
-        let selectedClass = null; // To store the currently selected class
-        let selectedDate = null; // To store the currently selected date
-
-        function loadClassButtons(classes) {
-            classButtonsContainer.innerHTML = ''; // Clear existing buttons
-            classes.forEach(className => {
-                const button = document.createElement('button');
-                button.classList.add('class-button');
-                button.textContent = className;
-                button.setAttribute('data-class', className);
-                button.addEventListener('click', () => {
-                    // Remove 'selected' from previously selected button
-                    if (selectedClass) {
-                        const prevSelected = document.querySelector(`.class-button[data-class="${selectedClass}"]`);
-                        if (prevSelected) {
-                            prevSelected.classList.remove('selected');
-                        }
-                    }
-                    // Add 'selected' to the clicked button
-                    button.classList.add('selected');
-                    selectedClass = className; // Update selected class
-                    console.log('Selected Class:', selectedClass);
-                    displayAttendanceTable(selectedClass, selectedDate); // Call to display attendance
-                });
-                classButtonsContainer.appendChild(button);
-            });
-        }
-
-        // Initialize with default classes (this will run if Firebase is not enabled or fails)
-        loadClassButtons(defaultClasses);
-
-        // --- Date Selection and View Button Logic ---
-        const attendanceDateInput = document.getElementById('attendanceDate');
-        const viewAttendanceBtn = document.getElementById('viewAttendanceBtn');
-
-        // Set default date to today
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-        const dd = String(today.getDate()).padStart(2, '0');
-        attendanceDateInput.value = `${yyyy}-${mm}-${dd}`;
-        selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate with today's date
-
-        attendanceDateInput.addEventListener('change', (event) => {
-            selectedDate = event.target.value;
-            console.log('Selected Date:', selectedDate);
-            displayAttendanceTable(selectedClass, selectedDate); // Re-display if class is already selected
-        });
-
-        viewAttendanceBtn.addEventListener('click', () => {
-            if (!selectedClass) {
-                alert('Please select a class first.');
-                return;
-            }
-            if (!selectedDate) {
-                alert('Please select a date.');
-                return;
-            }
-            displayAttendanceTable(selectedClass, selectedDate);
-        });
-
-        // --- Display Attendance Table (Mock Data for now) ---
-        const attendanceTableBody = document.getElementById('attendanceTableBody');
-
-        function displayAttendanceTable(className, date) {
-            attendanceTableBody.innerHTML = ''; // Clear previous data
-
-            if (!className || !date) {
-                attendanceTableBody.innerHTML = '<tr><td colspan="3">Please select a class and date to view attendance.</td></tr>';
-                return;
-            }
-
-            // Mock data - Replace with Firebase data fetching
-            // In a real application, you'd fetch data for the selected class and date from Firebase.
-            const mockStudents = {
-                'S.1': [
-                    { roll: '001', name: 'Alice Smith', status: 'present' },
-                    { roll: '002', name: 'Bob Johnson', status: 'absent' },
-                    { roll: '003', name: 'Charlie Brown', status: 'present' }
-                ],
-                'S.2': [
-                    { roll: '004', name: 'Diana Prince', status: 'present' },
-                    { roll: '005', name: 'Clark Kent', status: 'present' }
-                ],
-                'S.3': [
-                    { roll: '006', name: 'Bruce Wayne', status: 'absent' },
-                    { roll: '007', name: 'Selina Kyle', status: 'present' }
-                ],
-                'S.4': [
-                    { roll: '008', name: 'Peter Parker', status: 'present' },
-                    { roll: '009', name: 'Mary Jane', status: 'absent' }
-                ],
-                'S.5': [
-                    { roll: '010', name: 'Tony Stark', status: 'present' },
-                    { roll: '011', name: 'Natasha Romanoff', status: 'present' }
-                ],
-                'S.6': [
-                    { roll: '012', name: 'Steve Rogers', status: 'absent' },
-                    { roll: '013', name: 'Bucky Barnes', status: 'present' }
-                ]
-            };
-
-            const studentsInClass = mockStudents[className] || [];
-
-            if (studentsInClass.length === 0) {
-                attendanceTableBody.innerHTML = `<tr><td colspan="3">No students found for ${className} on ${date}.</td></tr>`;
-                return;
-            }
-
-            studentsInClass.forEach(student => {
-                const row = document.createElement('tr');
-                let statusIcon = '';
-                let rowClass = '';
-
-                if (student.status === 'present') {
-                    statusIcon = '<i class="fas fa-check-circle status-icon present"></i> Present';
-                    rowClass = 'attendance-present';
-                } else if (student.status === 'absent') {
-                    statusIcon = '<i class="fas fa-times-circle status-icon absent"></i> Absent';
-                    rowClass = 'attendance-absent';
-                } else {
-                    statusIcon = 'N/A';
-                    rowClass = 'attendance-na';
-                }
-
-                row.classList.add(rowClass);
-                row.innerHTML = `
-                    <td>${student.roll}</td>
-                    <td>${student.name}</td>
-                    <td>${statusIcon}</td>
-                `;
-                attendanceTableBody.appendChild(row);
-            });
-
-            // --- Firebase Integration (Uncomment and configure if using Firebase) ---
-            /*
-            if (firebaseApp) {
-                const db = firebase.firestore();
-                // Example path: attendance/CLASS_NAME/DATE/students
-                db.collection('attendance').doc(className).collection(date).get()
-                    .then(snapshot => {
-                        if (snapshot.empty) {
-                            attendanceTableBody.innerHTML = `<tr><td colspan="3">No attendance data for ${className} on ${date}.</td></tr>`;
-                            return;
-                        }
-
-                        snapshot.forEach(doc => {
-                            const student = doc.data();
-                            const row = document.createElement('tr');
-                            let statusIcon = '';
-                            let rowClass = '';
-
-                            if (student.status === 'present') {
-                                statusIcon = '<i class="fas fa-check-circle status-icon present"></i> Present';
-                                rowClass = 'attendance-present';
-                            } else if (student.status === 'absent') {
-                                statusIcon = '<i class="fas fa-times-circle status-icon absent"></i> Absent';
-                                rowClass = 'attendance-absent';
-                            } else {
-                                statusIcon = 'N/A';
-                                rowClass = 'attendance-na';
-                            }
-
-                            row.classList.add(rowClass);
-                            row.innerHTML = `
-                                <td>${student.roll || 'N/A'}</td>
-                                <td>${student.name || 'N/A'}</td>
-                                <td>${statusIcon}</td>
-                            `;
-                            attendanceTableBody.appendChild(row);
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Error fetching attendance data: ", error);
-                        attendanceTableBody.innerHTML = `<tr><td colspan="3">Error loading attendance data.</td></tr>`;
-                    });
-            } else {
-                console.warn("Firebase not initialized. Using mock data.");
-                // Fallback to mock data if Firebase not initialized
-            }
-            */
-        }
-
-        // Initial display check in case a date is pre-selected or class is handled differently
-        displayAttendanceTable(selectedClass, selectedDate);
-
-
-        // --- Firebase Class Loading (Uncomment and configure if using Firebase) ---
-        /*
-        if (firebaseApp) {
-            const db = firebase.firestore();
-            // Assuming you have a 'classes' collection with documents like { name: "S.1", order: 1 }
-            db.collection('classes').orderBy('order').get().then((snapshot) => {
-                if (!snapshot.empty) {
-                    const firebaseClasses = [];
-                    snapshot.forEach(doc => {
-                        firebaseClasses.push(doc.data().name); // Get the 'name' field
-                    });
-                    loadClassButtons(firebaseClasses);
-                } else {
-                    console.warn("No classes found in Firebase 'classes' collection. Loading default classes.");
-                    loadClassButtons(defaultClasses); // Fallback to default
-                }
-            }).catch(error => {
-                console.error("Error loading classes from Firebase:", error);
-                loadClassButtons(defaultClasses); // Fallback to default on error
-            });
-        } else {
-            console.warn("Firebase not initialized. Using default classes.");
-            // If Firebase is not initialized, defaultClasses will already be loaded by the call above.
-        }
-        */
     </script>
 </body>
 </html>
