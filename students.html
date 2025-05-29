@@ -3,65 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - View Attendance</title>
+    <title>Caring Heart - Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <meta name="description" content="Student portal to view class-specific attendance records.">
-    <meta name="keywords" content="student, attendance, class, view, school">
-</head>
+    </head>
 <body>
-    <div class="container student-container">
-        <header class="portal-header">
-            <h1>Student Portal</h1>
-            <p class="sub-heading">Select your class to view attendance records.</p>
-        </header>
+    <header>
+        <div class="header-brand">
+            <img src="img/slazzer-edit-image-removebg-preview (1)_preview_rev_1.png" alt="Caring Heart Logo" class="header-logo" />
+            <h1 class="brand-title">Caring Heart</h1>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleDropdown()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="dropdown-panel" id="dropdownPanel">
+            </div>
+    </header>
+
+    <div class="container">
+        <section class="portal-header">
+            <h2>Student Attendance View</h2>
+            <p class="sub-heading">Select your class and date to view attendance records.</p>
+        </section>
 
         <section class="class-selection-section">
             <h2>Select Your Class</h2>
-            <div class="class-selection" id="studentClassSelection">
-                <button class="class-button" data-class="S.1">S.1</button>
-                <button class="class-button" data-class="S.2">S.2</button>
-                <button class="class-button" data-class="S.3">S.3</button>
-                <button class="class-button" data-class="S.4">S.4</button>
-                <button class="class-button" data-class="S.5">S.5</button>
-                <button class="class-button" data-class="S.6">S.6</button>
+            <div class="class-selection" id="classButtonsContainer">
+                </div>
+            <p class="info-text">Please select your class to view attendance.</p>
+        </section>
+
+        <section class="date-selection-section">
+            <h2>Select Date</h2>
+            <div class="input-group">
+                <label for="attendanceDate" class="sr-only">Attendance Date</label>
+                <input type="date" id="attendanceDate" />
+                <button id="viewAttendanceBtn" class="action-button primary-button">
+                    <i class="fas fa-eye icon"></i> View Attendance
+                </button>
             </div>
         </section>
 
-        <section id="dateSelection" class="date-selection-section" style="display: none;">
-            <h2>Select a Date for <span id="selectedClassStudentHeader"></span></h2>
-            <input type="date" id="attendanceDateStudent" class="date-input">
-            <button id="viewAttendanceBtn" class="action-button primary-button">View Attendance</button>
-        </section>
-
-        <section id="attendanceTableContainer" class="attendance-table-section" style="display: none;">
-            <h2>Attendance for <span id="selectedClassStudent"></span> on <span id="selectedDateStudent"></span></h2>
+        <section class="attendance-table-section">
+            <h2>Attendance Records</h2>
             <div class="table-responsive">
-                <table id="attendanceTable" class="data-table">
+                <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Roll Number</th>
                             <th>Student Name</th>
-                            <th>Status</th>
+                            <th>Attendance Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        </tbody>
+                    <tbody id="attendanceTableBody">
+                        <tr><td colspan="3">Select a class and date to view attendance.</td></tr>
+                    </tbody>
                 </table>
             </div>
-            <p class="info-text">Attendance data is updated by school monitors daily.</p>
+            <p class="info-text small-text">
+                <i class="fas fa-info-circle info-icon"></i> Attendance data is loaded from the system.
+            </p>
         </section>
 
         <div class="navigation-buttons">
             <a href="index.html" class="section-button small-button">
                 <i class="fas fa-home icon"></i>
-                <span>Back to Home</span>
+                <span class="button-text">Home</span>
             </a>
         </div>
+
+        <footer class="system-footer" role="contentinfo">
+            <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
+            <p>Powered by Firebase.</p>
+        </footer>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/students.js"></script>
+    <script>
+        // Set current year in footer dynamically
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Toggle dropdown menu for mobile/smaller screens
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownPanel');
+            dropdown.classList.toggle('show');
+            const menuToggleBtn = document.querySelector('.menu-toggle');
+            const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+            menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
+        }
+
+        // --- Class Selection Logic ---
+        const classButtonsContainer = document.getElementById('classButtonsContainer');
+        // CORRECTED: Class names from S.1 to S.6
+        const defaultClasses = ['S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6']; 
+        let selectedClass = null; // To store the currently selected class
+        let selectedDate = null; // To store the currently selected date
+
+        function loadClassButtons(classes) {
+            classButtonsContainer.innerHTML = ''; // Clear existing buttons
+            classes.forEach(className => {
+                const button = document.createElement('button');
+                button.classList.add('class-button');
+                button.textContent = className;
+                button.setAttribute('data-class', className);
+                button.addEventListener('click', () => {
+                    // Remove 'selected' from previously selected button
+                    if (selectedClass) {
+                        const prevSelected = document.querySelector(`.class-button[data-class="${selectedClass}"]`);
+                        if (prevSelected) {
+                            prevSelected.classList.remove('selected');
+                        }
+                    }
+                    // Add 'selected' to the clicked button
+                    button.classList.add('selected');
+                    selectedClass = className; // Update selected class
+                    console.log('Selected Class:', selectedClass);
+                    displayAttendanceTable(selectedClass, selectedDate); // Call to display attendance
+                });
+                classButtonsContainer.appendChild(button);
+            });
+        }
+
+        // Initialize with default classes (this will run if Firebase is not enabled or fails)
+        loadClassButtons(defaultClasses);
+
+        // --- Date Selection and View Button Logic ---
+        const attendanceDateInput = document.getElementById('attendanceDate');
+        const viewAttendanceBtn = document.getElementById('viewAttendanceBtn');
+
+        // Set default date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const dd = String(today.getDate()).padStart(2, '0');
+        attendanceDateInput.value = `${yyyy}-${mm}-${dd}`;
+        selectedDate = `${yyyy}-${mm}-${dd}`; // Initialize selectedDate with today's date
+
+        attendanceDateInput.addEventListener('change', (event) => {
+            selectedDate = event.target.value;
+            console.log('Selected Date:', selectedDate);
+            displayAttendanceTable(selectedClass, selectedDate); // Re-display if class is already selected
+        });
+
+        viewAttendanceBtn.addEventListener('click', () => {
+            if (!selectedClass) {
+                alert('Please select a class first.');
+                return;
+            }
+            if (!selectedDate) {
+                alert('Please select a date.');
+                return;
+            }
+            displayAttendanceTable(selectedClass, selectedDate);
+        });
+
+        // --- Display Attendance Table (Mock Data for now) ---
+        const attendanceTableBody = document.getElementById('attendanceTableBody');
+
+        function displayAttendanceTable(className, date) {
+            attendanceTableBody.innerHTML = ''; // Clear previous data
+
+            if (!className || !date) {
+                attendanceTableBody.innerHTML = '<tr><td colspan="3">Please select a class and date to view attendance.</td></tr>';
+                return;
+            }
+
+            // Mock data - Replace with Firebase data fetching
+            // In a real application, you'd fetch data for the selected class and date from Firebase.
+            const mockStudents = {
+                'S.1': [
+                    { roll: '001', name: 'Alice Smith', status: 'present' },
+                    { roll: '002', name: 'Bob Johnson', status: 'absent' },
+                    { roll: '003', name: 'Charlie Brown', status: 'present' }
+                ],
+                'S.2': [
+                    { roll: '004', name: 'Diana Prince', status: 'present' },
+                    { roll: '005', name: 'Clark Kent', status: 'present' }
+                ],
+                'S.3': [
+                    { roll: '006', name: 'Bruce Wayne', status: 'absent' },
+                    { roll: '007', name: 'Selina Kyle', status: 'present' }
+                ],
+                'S.4': [
+                    { roll: '008', name: 'Peter Parker', status: 'present' },
+                    { roll: '009', name: 'Mary Jane', status: 'absent' }
+                ],
+                'S.5': [
+                    { roll: '010', name: 'Tony Stark', status: 'present' },
+                    { roll: '011', name: 'Natasha Romanoff', status: 'present' }
+                ],
+                'S.6': [
+                    { roll: '012', name: 'Steve Rogers', status: 'absent' },
+                    { roll: '013', name: 'Bucky Barnes', status: 'present' }
+                ]
+            };
+
+            const studentsInClass = mockStudents[className] || [];
+
+            if (studentsInClass.length === 0) {
+                attendanceTableBody.innerHTML = `<tr><td colspan="3">No students found for ${className} on ${date}.</td></tr>`;
+                return;
+            }
+
+            studentsInClass.forEach(student => {
+                const row = document.createElement('tr');
+                let statusIcon = '';
+                let rowClass = '';
+
+                if (student.status === 'present') {
+                    statusIcon = '<i class="fas fa-check-circle status-icon present"></i> Present';
+                    rowClass = 'attendance-present';
+                } else if (student.status === 'absent') {
+                    statusIcon = '<i class="fas fa-times-circle status-icon absent"></i> Absent';
+                    rowClass = 'attendance-absent';
+                } else {
+                    statusIcon = 'N/A';
+                    rowClass = 'attendance-na';
+                }
+
+                row.classList.add(rowClass);
+                row.innerHTML = `
+                    <td>${student.roll}</td>
+                    <td>${student.name}</td>
+                    <td>${statusIcon}</td>
+                `;
+                attendanceTableBody.appendChild(row);
+            });
+
+            // --- Firebase Integration (Uncomment and configure if using Firebase) ---
+            /*
+            if (firebaseApp) {
+                const db = firebase.firestore();
+                // Example path: attendance/CLASS_NAME/DATE/students
+                db.collection('attendance').doc(className).collection(date).get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            attendanceTableBody.innerHTML = `<tr><td colspan="3">No attendance data for ${className} on ${date}.</td></tr>`;
+                            return;
+                        }
+
+                        snapshot.forEach(doc => {
+                            const student = doc.data();
+                            const row = document.createElement('tr');
+                            let statusIcon = '';
+                            let rowClass = '';
+
+                            if (student.status === 'present') {
+                                statusIcon = '<i class="fas fa-check-circle status-icon present"></i> Present';
+                                rowClass = 'attendance-present';
+                            } else if (student.status === 'absent') {
+                                statusIcon = '<i class="fas fa-times-circle status-icon absent"></i> Absent';
+                                rowClass = 'attendance-absent';
+                            } else {
+                                statusIcon = 'N/A';
+                                rowClass = 'attendance-na';
+                            }
+
+                            row.classList.add(rowClass);
+                            row.innerHTML = `
+                                <td>${student.roll || 'N/A'}</td>
+                                <td>${student.name || 'N/A'}</td>
+                                <td>${statusIcon}</td>
+                            `;
+                            attendanceTableBody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching attendance data: ", error);
+                        attendanceTableBody.innerHTML = `<tr><td colspan="3">Error loading attendance data.</td></tr>`;
+                    });
+            } else {
+                console.warn("Firebase not initialized. Using mock data.");
+                // Fallback to mock data if Firebase not initialized
+            }
+            */
+        }
+
+        // Initial display check in case a date is pre-selected or class is handled differently
+        displayAttendanceTable(selectedClass, selectedDate);
+
+
+        // --- Firebase Class Loading (Uncomment and configure if using Firebase) ---
+        /*
+        if (firebaseApp) {
+            const db = firebase.firestore();
+            // Assuming you have a 'classes' collection with documents like { name: "S.1", order: 1 }
+            db.collection('classes').orderBy('order').get().then((snapshot) => {
+                if (!snapshot.empty) {
+                    const firebaseClasses = [];
+                    snapshot.forEach(doc => {
+                        firebaseClasses.push(doc.data().name); // Get the 'name' field
+                    });
+                    loadClassButtons(firebaseClasses);
+                } else {
+                    console.warn("No classes found in Firebase 'classes' collection. Loading default classes.");
+                    loadClassButtons(defaultClasses); // Fallback to default
+                }
+            }).catch(error => {
+                console.error("Error loading classes from Firebase:", error);
+                loadClassButtons(defaultClasses); // Fallback to default on error
+            });
+        } else {
+            console.warn("Firebase not initialized. Using default classes.");
+            // If Firebase is not initialized, defaultClasses will already be loaded by the call above.
+        }
+        */
+    </script>
 </body>
 </html>
