@@ -3,75 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Portal - Manage Attendance</title>
+    <title>Monitor Dashboard - Caring Heart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <meta name="description" content="Monitor dashboard for managing and updating student attendance records.">
-    <meta name="keywords" content="monitor, attendance, management, school, classes, students">
+    <meta name="description" content="Monitor and manage student attendance records for Caring Heart school.">
+    <meta name="keywords" content="school, attendance, monitor, management, dashboard, Firebase, Caring Heart">
+    <meta name="author" content="Your Name or Organization">
 </head>
 <body>
-    <div class="container monitor-container">
-        <header class="portal-header">
-            <h1>Monitor Attendance</h1>
-            <p class="sub-heading">Select a class and date to manage attendance.</p>
-        </header>
+    <header>
+        <div class="header-brand">
+            <img src="img/slazzer-edit-image-removebg-preview (1)_preview_rev_1.png" alt="Caring Heart Logo" class="header-logo" />
+            <h1 class="brand-title">Caring Heart</h1>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleDropdown()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="dropdown-panel" id="dropdownPanel">
+            </div>
+    </header>
+
+    <div class="container portal-container">
+        <section class="portal-header">
+            <h2>Monitor Dashboard</h2>
+            <p class="sub-heading">Manage student attendance records for your classes.</p>
+        </section>
 
         <section class="class-selection-section">
-            <h2>Select Class</h2>
-            <div class="class-selection" id="monitorClassSelection">
-                <button class="class-button-monitor" data-class="S.1">S.1</button>
-                <button class="class-button-monitor" data-class="S.2">S.2</button>
-                <button class="class-button-monitor" data-class="S.3">S.3</button>
-                <button class="class-button-monitor" data-class="S.4">S.4</button>
-                <button class="class-button-monitor" data-class="S.5">S.5</button>
-                <button class="class-button-monitor" data-class="S.6">S.6</button>
+            <h3>Select a Class</h3>
+            <div class="class-selection" id="classSelection">
+                <button class="class-button-monitor" data-class-id="ClassA">Class A</button>
+                <button class="class-button-monitor" data-class-id="ClassB">Class B</button>
+                <button class="class-button-monitor" data-class-id="ClassC">Class C</button>
             </div>
         </section>
 
-        <section id="monitorDateSelection" class="date-selection-section" style="display: none;">
-            <h2>Select Date</h2>
-            <input type="date" id="attendanceDateMonitor" class="date-input">
-            <button id="loadStudentsBtn" class="action-button primary-button">Load Students</button>
+        <section class="date-selection-section">
+            <h3>Select Date for Attendance</h3>
+            <div class="input-group">
+                <label for="attendanceDate" class="sr-only">Attendance Date</label>
+                <input type="date" id="attendanceDate">
+                <button class="action-button primary-button" id="loadAttendanceBtn">Load Attendance</button>
+            </div>
         </section>
 
-        <section id="monitorAttendanceManagement" class="attendance-management-section" style="display: none;">
-            <h2>Manage Attendance for <span id="monitorSelectedClass"></span> on <span id="monitorSelectedDate"></span></h2>
+        <section class="attendance-table-section">
+            <h3>Attendance for <span id="selectedClassName"></span> on <span id="displayDate"></span></h3>
             <div class="table-responsive">
-                <table id="monitorAttendanceTable" class="data-table">
+                <table class="data-table" id="attendanceTable">
                     <thead>
                         <tr>
                             <th>Student Name</th>
                             <th>Status</th>
-                        </tr>
+                            <th>Actions</th> </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="attendanceTableBody">
                         </tbody>
                 </table>
             </div>
-
-            <div class="add-student-section card">
-                <h3>Add New Student to <span id="addStudentClass"></span></h3>
-                <div class="input-group">
-                    <input type="text" id="newStudentName" placeholder="Enter student name" required class="text-input">
-                    <button id="addNewStudentBtn" class="action-button add-button">Add Student</button>
-                </div>
-                <p class="info-text">New students are added to the selected class.</p>
-            </div>
-
-            <button id="saveAttendanceBtn" class="action-button save-button">Save Attendance</button>
+            <button class="action-button save-button" id="saveAttendanceBtn" style="display:none;">Save Attendance</button>
+            <p id="attendanceMessage" class="info-text"></p>
         </section>
 
-        <div class="navigation-buttons">
-            <a href="index.html" class="section-button small-button">
+        <section class="add-student-section">
+            <h3>Add New Student</h3>
+            <div class="input-group">
+                <label for="newStudentName" class="sr-only">New Student Name</label>
+                <input type="text" id="newStudentName" placeholder="Student Name">
+                <button class="action-button add-button" id="addStudentBtn">Add Student</button>
+            </div>
+            <p id="addStudentMessage" class="info-text"></p>
+        </section>
+
+        <section class="navigation-buttons">
+            <a href="index.html" class="small-button section-button glow-on-hover" role="button" aria-label="Go back to Home">
                 <i class="fas fa-home icon"></i>
-                <span>Back to Home</span>
+                <span class="button-text">Home</span>
             </a>
-        </div>
+        </section>
+
+        <footer class="system-footer" role="contentinfo">
+            <p>&copy; <span id="current-year"></span> Caring Heart. All rights reserved.</p>
+            <p>Powered by Firebase.</p>
+        </footer>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/monitor.js"></script>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Toggle dropdown menu for mobile
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownPanel');
+            dropdown.classList.toggle('show');
+            const menuToggleBtn = document.querySelector('.menu-toggle');
+            const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+            menuToggleBtn.setAttribute('aria-expanded', !isExpanded);
+        }
+    </script>
 </body>
 </html>
