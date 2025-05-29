@@ -1,557 +1,337 @@
-/* --- General Body and Container Styles --- */
+/* General Body and Base Styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #eef2f7 0%, #d8e1e7 100%);
     margin: 0;
-    display: flex;
-    flex-direction: column; /* Changed to column to stack header and main content */
-    min-height: 100vh;
-    box-sizing: border-box;
+    padding: 0;
+    background-color: #f4f7fa; /* Light grey background */
     color: #333;
     line-height: 1.6;
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* Base container for main content below header */
 .container {
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 16px; /* Slightly more rounded */
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* More prominent shadow */
-    text-align: center;
-    width: 100%;
-    max-width: 960px; /* Increased max-width */
-    box-sizing: border-box;
-    margin: 30px auto; /* Added margin for better spacing on larger screens */
-    animation: fadeIn 0.8s ease-out;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    flex-grow: 1; /* Allows container to take up available space */
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Header and Typography --- */
-h1, h2, h3 {
-    color: #2c3e50;
-    margin-bottom: 25px;
-    font-weight: 700; /* Bolder headings */
-    letter-spacing: -0.5px;
-}
-
-h1 {
-    font-size: 2.8em;
-    animation: scaleIn 0.6s ease-out;
-}
-
-@keyframes scaleIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-h2 {
-    font-size: 2em;
-    border-bottom: 2px solid #f0f4f8;
-    padding-bottom: 10px;
-    margin-top: 35px;
-}
-
-h3 {
-    font-size: 1.5em;
-    color: #34495e;
-}
-
-.sub-heading {
-    font-size: 1.1em;
-    color: #555;
-    margin-bottom: 30px;
-}
-
-.tagline {
-    font-size: 1.2em;
-    color: #666;
-    margin-bottom: 40px;
-    font-style: italic;
-}
-
-.highlight {
-    color: #3498db;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/* --- Caring Heart Header Styles --- */
-:root {
-    --primary-blue: #007bff;
-    --primary-red: #dc3545;
-    --btn-radius: 8px;
-    --transition: all 0.3s ease;
-}
-
+/* Header */
 header {
-    background: linear-gradient(90deg, var(--primary-red), var(--primary-blue));
-    color: white;
-    padding: 1rem 2rem;
+    background-color: #2c3e50; /* Dark blue-grey */
+    color: #ecf0f1;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative; /* For dropdown positioning */
-    z-index: 20; /* Ensure header is above other content */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .header-brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
 }
 
 .header-logo {
-    height: 60px; /* Adjusted height for better fit */
-    width: auto;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+    height: 50px;
+    margin-right: 15px;
 }
 
 .brand-title {
-    font-size: 2.2rem; /* Adjusted size */
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    margin-bottom: 0; /* Override default h1 margin */
-}
-
-/* General button styles (used by modal buttons now) */
-.btn {
-    padding: 0.6rem 1.4rem;
-    border: none;
-    border-radius: var(--btn-radius);
+    margin: 0;
+    font-size: 1.8em;
     font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.btn-login { /* Used by 'Cancel' button in modal if it has this class */
-    background-color: var(--primary-red);
-    color: white;
-}
-
-.btn-register { /* Used by 'Submit' button in modal if it has this class */
-    background-color: var(--primary-blue);
-    color: white;
-}
-
-.btn-login:hover {
-    background-color: #b02a37;
-}
-
-.btn-register:hover {
-    background-color: #0056b3;
 }
 
 .menu-toggle {
-    display: none; /* Hidden by default on desktop, shown on mobile */
-    font-size: 1.8rem;
     background: none;
     border: none;
-    color: white;
+    color: #ecf0f1;
+    font-size: 1.8em;
     cursor: pointer;
-    padding: 0.5rem;
+    display: none; /* Hidden by default, shown on smaller screens */
 }
 
 .dropdown-panel {
-    position: absolute;
-    top: 100%; /* Position right below the header */
-    right: 0;
-    background: white;
-    display: none; /* Hidden by default */
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow for dropdown */
-    animation: slideDown 0.3s ease forwards;
-    z-index: 10;
-    min-width: 180px; /* Ensure dropdown has some width */
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    /* No active elements for now, can be styled later if needed */
+    display: none; /* Hide for now, can be toggled by JS */
 }
 
-.dropdown-panel a.btn {
-    margin: 0.5rem 0;
-    width: 90%;
+/* Hero Section (index.html) */
+.hero-section {
     text-align: center;
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@media (max-width: 768px) {
-    /* .header-buttons was removed from HTML */
-
-    .menu-toggle {
-        display: block; /* Show menu toggle button on smaller screens */
-    }
-
-    .dropdown-panel.show {
-        display: flex; /* Show dropdown when 'show' class is present */
-    }
-}
-
-/* --- Section specific styling (from previous style.css) --- */
-.welcome-container {
-    padding-top: 40px; /* Adjust padding as header is now fixed */
-    padding-bottom: 40px;
-    margin-top: 0; /* Remove top margin as header handles spacing */
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #3498db, #8e44ad); /* Blue to Purple gradient */
+    color: #fff;
+    border-radius: 8px;
     margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+.hero-title {
+    font-size: 2.8em;
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+    font-size: 1.3em;
+    opacity: 0.9;
+}
+
+/* Section Headers */
+section h2 {
+    font-size: 2em;
+    color: #2c3e50;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
 .portal-header {
-    margin-bottom: 40px;
-}
-.class-selection-section, .date-selection-section,
-.attendance-table-section, .attendance-management-section,
-.add-student-section { /* Kept add-student-section for general reference but it's now wrapped */
-    background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 10px;
+    text-align: center;
     margin-bottom: 30px;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.info-text {
-    font-size: 0.9em;
-    color: #777;
-    margin-top: 20px;
-    font-style: italic;
+.portal-header h2 {
+    font-size: 2.5em;
+    color: #34495e;
+    border-bottom: none;
+    margin-bottom: 5px;
 }
 
-.small-text {
-    font-size: 0.8em;
-    color: #888;
+.sub-heading {
+    font-size: 1.1em;
+    color: #7f8c8d;
 }
 
-/* --- Main Section Buttons (index.html) --- */
-.main-sections {
+/* Feature Buttons (Home Page) */
+.feature-buttons {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
     justify-content: center;
     gap: 30px;
-    margin-top: 50px;
+    margin-bottom: 40px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 .section-button {
+    background-color: #3498db; /* Blue */
+    color: #fff;
+    padding: 30px;
+    border-radius: 10px;
     text-decoration: none;
-    color: #333;
-    background-color: #f0f4f8;
-    padding: 35px 50px;
-    border-radius: 15px;
-    transition: all 0.3s ease; /* All properties for smoother transition */
+    text-align: center;
+    transition: all 0.3s ease;
+    min-width: 280px; /* Ensure buttons are not too small */
+    max-width: 45%;
+    flex-grow: 1; /* Allows buttons to grow within flex container */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 1.3em;
-    font-weight: bold;
-    min-width: 250px; /* Slightly wider */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* More subtle initial shadow */
-    position: relative; /* For glow effect */
-    overflow: hidden; /* For glow effect */
 }
 
 .section-button:hover {
-    background-color: #e0e7ed;
-    transform: translateY(-8px); /* More pronounced lift */
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Stronger hover shadow */
+    background-color: #2980b9;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .section-button .icon {
-    font-size: 3.8em; /* Slightly larger icon */
-    margin-bottom: 18px;
-    color: #3498db;
-    transition: transform 0.3s ease;
-}
-
-.section-button:hover .icon {
-    transform: scale(1.1); /* Icon scales on hover */
+    font-size: 3em;
+    margin-bottom: 15px;
 }
 
 .section-button .button-text {
-    margin-bottom: 8px; /* Space between text and description */
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 5px;
 }
 
 .section-button .button-description {
-    font-size: 0.85em;
-    font-weight: normal;
-    color: #666;
-    text-align: center;
-    line-height: 1.3;
+    font-size: 0.9em;
+    opacity: 0.9;
 }
 
-/* Glow on Hover Effect */
-.glow-on-hover::before {
-    content: '';
-    background: linear-gradient(
-        45deg,
-        #ff0000, #ff7300, #fffb00, #48ff00,
-        #00ffd5, #002bff, #7a00ff, #ff00c8,
-        #ff0000
-    );
-    position: absolute;
-    top: -200%;
-    left: -200%;
-    width: 400%;
-    height: 400%;
-    transform: rotate(45deg);
-    transition: all 0.7s ease;
-    filter: blur(10px); /* Adjust blur for desired glow intensity */
-    opacity: 0;
-    z-index: 0;
-}
-
-.glow-on-hover:hover::before {
-    opacity: 1;
-    top: -50%;
-    left: -50%;
-}
-
-.glow-on-hover span, .glow-on-hover .icon, .glow-on-hover p {
-    position: relative;
-    z-index: 1;
-}
-
-/* Small Buttons for Navigation */
-.small-button {
-    padding: 12px 25px;
-    font-size: 1em;
-    min-width: unset;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-}
-.small-button .icon {
-    font-size: 1.5em;
-    margin-bottom: 5px;
-}
-.small-button .button-text {
-    font-size: 1em;
-}
-.small-button .button-description {
-    display: none; /* Hide description for small buttons */
-}
-.navigation-buttons {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-/* Class selection buttons */
+/* Class Selection */
 .class-selection {
-    margin-top: 35px;
-    margin-bottom: 25px;
     display: flex;
     flex-wrap: wrap;
+    gap: 10px;
     justify-content: center;
-    gap: 18px;
+    margin-bottom: 20px;
 }
 
 .class-button, .class-button-monitor {
-    background-color: #3498db;
-    color: white;
-    padding: 14px 28px;
-    border: none;
+    background-color: #ecf0f1; /* Light grey */
+    color: #2c3e50;
+    border: 1px solid #bdc3c7;
+    padding: 12px 20px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1.15em;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    min-width: 90px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 1.1em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Prevent buttons from shrinking too much */
 }
 
 .class-button:hover, .class-button-monitor:hover {
-    background-color: #2980b9;
-    transform: translateY(-3px); /* More movement on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background-color: #dbe0e3;
+    border-color: #95a5a6;
 }
 
 .class-button.selected, .class-button-monitor.selected {
-    background-color: #27ae60; /* Green when selected */
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25); /* Stronger shadow for selected */
+    background-color: #3498db;
+    color: #fff;
+    border-color: #2980b9;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
     transform: translateY(-2px);
-    border: 2px solid #2ecc71; /* Highlight border */
 }
 
-/* Input Fields and Buttons */
-.date-selection-section .input-group,
-.section-column .input-group { /* Apply to input-groups in columns as well */
+/* Date Selection */
+.date-selection-section .input-group {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 15px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Allow wrapping */
 }
 
-input[type="date"],
-input[type="text"],
-input[type="email"],
-input[type="password"] {
+.date-selection-section label {
+    font-weight: bold;
+    color: #555;
+}
+
+.date-selection-section input[type="date"] {
     padding: 12px 15px;
     border: 1px solid #ccc;
-    border-radius: 8px; /* Slightly more rounded */
+    border-radius: 8px;
     font-size: 1em;
-    width: 80%;
-    max-width: 350px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-input[type="date"]:focus,
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
-    outline: none;
+    flex-grow: 1; /* Allow input to grow */
+    max-width: 250px; /* Limit max width */
 }
 
 /* Action Buttons */
 .action-button {
-    color: white;
-    padding: 14px 30px;
+    background-color: #2ecc71; /* Green */
+    color: #fff;
     border: none;
+    padding: 12px 25px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 1.1em;
     font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    min-width: 180px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .action-button:hover {
+    background-color: #27ae60;
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.action-button .icon {
+    font-size: 1.2em;
 }
 
 .primary-button {
-    background-color: #007bff;
+    background-color: #3498db; /* Blue */
 }
 .primary-button:hover {
-    background-color: #0056b3;
+    background-color: #2980b9;
 }
 
 .save-button {
-    background-color: #2ecc71; /* Green for saving */
+    background-color: #27ae60; /* Darker Green */
 }
 .save-button:hover {
-    background-color: #27ad60;
+    background-color: #219d53;
 }
 
 .add-button {
-    background-color: #4CAF50; /* Green for adding student */
+    background-color: #f39c12; /* Orange */
 }
 .add-button:hover {
-    background-color: #45a049;
+    background-color: #e67e22;
 }
 
-/* Table styles */
+.delete-button {
+    background-color: #e74c3c; /* Red */
+}
+.delete-button:hover {
+    background-color: #c0392b;
+}
+
+/* Data Tables */
 .table-responsive {
-    overflow-x: auto; /* Enable horizontal scrolling for tables on small screens */
-    margin-top: 30px;
+    overflow-x: auto; /* Allows horizontal scrolling on small screens */
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-    overflow: hidden; /* Ensures rounded corners are applied */
+    min-width: 600px; /* Ensure table is readable on smaller screens */
 }
 
 .data-table th, .data-table td {
-    border: 1px solid #e0e0e0; /* Lighter border */
     padding: 15px;
     text-align: left;
-    white-space: nowrap; /* Prevent text wrapping in cells */
+    border-bottom: 1px solid #eee;
 }
 
 .data-table th {
-    background-color: #f2f4f7; /* Light gray header */
+    background-color: #f8f9fa; /* Light grey header */
+    font-weight: 600;
     color: #555;
-    font-weight: bold;
     text-transform: uppercase;
-    font-size: 0.95em;
-    letter-spacing: 0.5px;
+    font-size: 0.9em;
 }
 
-.data-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-.data-table tr:hover {
-    background-color: #f0f0f0; /* Hover effect on rows */
-    transition: background-color 0.2s ease;
+.data-table tbody tr:hover {
+    background-color: #f0f4f7;
 }
 
-/* Status icons in student view */
+/* Attendance Status Styling in Table */
+.attendance-present {
+    color: #27ae60; /* Green */
+    font-weight: 500;
+}
+
+.attendance-absent {
+    color: #e74c3c; /* Red */
+    font-weight: 500;
+}
+
+.attendance-na {
+    color: #7f8c8d; /* Grey */
+}
+
 .status-icon {
-    font-size: 1.3em; /* Slightly larger icons */
-    font-weight: bold;
-    vertical-align: middle; /* Align with text */
     margin-right: 5px;
 }
 
-.status-icon.present {
-    color: #28a745; /* Green for tick */
-}
-.status-icon.absent {
-    color: #dc3545; /* Red for cross */
-}
-
-/* Additional styling for table rows based on status */
-.attendance-present {
-    background-color: #e6ffe6; /* Very light green for present rows */
-}
-.attendance-absent {
-    background-color: #ffe6e6; /* Very light red for absent rows */
-}
-.attendance-na {
-    background-color: #f0f0f0; /* Light gray for N/A rows */
-    color: #666;
-}
-.info-icon {
-    color: #6c757d;
-    font-size: 0.9em;
-    margin-left: 5px;
-    cursor: help;
-}
-
-
-/* Monitor attendance management radio buttons */
+/* Monitor Specific Attendance Controls */
 .monitor-attendance-status {
     display: flex;
-    gap: 10px;
-    justify-content: flex-start; /* Align radios to left within cell */
-    flex-wrap: wrap; /* Allow wrapping of radio options */
+    gap: 15px;
+    align-items: center;
 }
 
 .monitor-attendance-status input[type="radio"] {
@@ -559,263 +339,359 @@ input[type="password"]:focus {
 }
 
 .monitor-attendance-status label {
+    background-color: #e0e0e0;
+    color: #555;
+    padding: 8px 15px;
+    border-radius: 20px;
     cursor: pointer;
-    padding: 10px 15px; /* More padding */
+    transition: all 0.2s ease;
+    font-size: 0.95em;
     border: 1px solid #ccc;
-    border-radius: 6px; /* Slightly more rounded */
-    transition: all 0.2s ease; /* Smooth transition for all */
-    font-size: 0.9em;
-    display: inline-block;
-    user-select: none; /* Prevent text selection */
 }
 
 .monitor-attendance-status input[type="radio"]:checked + label {
-    color: white;
-    border-color: transparent; /* Remove border when checked */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    background-color: #3498db;
+    color: #fff;
+    border-color: #2980b9;
+    box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
 }
 
-.monitor-attendance-status input[type="radio"][value="present"]:checked + label {
-    background-color: #28a745; /* Green for present */
-}
-.monitor-attendance-status input[type="radio"][value="present"]:hover + label {
-    background-color: #34c45e; /* Lighter green on hover */
-}
-
-.monitor-attendance-status input[type="radio"][value="absent"]:checked + label {
-    background-color: #dc3545; /* Red for absent */
-}
-.monitor-attendance-status input[type="radio"][value="absent"]:hover + label {
-    background-color: #e65261; /* Lighter red on hover */
-}
-
-/* Quick remove button in table */
+/* Quick Remove Button in Table */
 .remove-student-btn {
-    background: none;
+    background-color: #e74c3c;
+    color: #fff;
     border: none;
-    color: #dc3545; /* Red for remove */
-    font-size: 1.2em;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
-    padding: 5px;
-    transition: transform 0.2s ease;
-}
-.remove-student-btn:hover {
-    transform: scale(1.2);
-    color: #c82333;
-}
-
-
-/* --- Footer Styles --- */
-.system-footer {
-    margin-top: 50px;
-    padding-top: 25px;
-    border-top: 1px solid #eee;
     font-size: 0.9em;
-    color: #777;
-}
-
-/* --- Modal Overlay --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
-    display: none; /* <--- THIS IS THE FIX! Changed from 'flex' to 'none' */
+    transition: background-color 0.3s ease;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    z-index: 1000; /* Ensure it's on top of everything */
-    animation: fadeInOverlay 0.3s ease;
+    gap: 5px;
 }
 
-@keyframes fadeInOverlay {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.remove-student-btn:hover {
+    background-color: #c0392b;
 }
 
-.modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: var(--btn-radius);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* More prominent shadow */
-    text-align: center;
-    width: 90%;
-    max-width: 400px;
-    animation: scaleInModal 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bounce effect */
-}
-
-@keyframes scaleInModal {
-    from { transform: scale(0.7); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.modal-content h2 {
-    font-size: 1.8em;
-    margin-bottom: 1.5rem;
-    color: #2c3e50;
-    border-bottom: none; /* Override default h2 border */
-}
-
-.modal-content input[type="password"] {
-    width: calc(100% - 20px); /* Adjust for padding if needed */
-    padding: 0.8rem 1rem; /* More padding */
-    font-size: 1.1rem;
-    margin: 1rem auto; /* Center input */
-    display: block; /* Make it a block element */
-    border: 1.5px solid #ccc;
-    border-radius: var(--btn-radius);
-    outline-offset: 2px;
-}
-
-.modal-content .btn {
-    margin: 0.5rem 0.5rem; /* Space between buttons */
-    min-width: 100px;
-}
-
-.error-message {
-    color: var(--primary-red);
-    font-weight: 600;
-    margin-top: 0.8rem;
-    min-height: 1.2em;
-    font-size: 0.95em;
-}
-
-/* NEW: Add/Remove Student Section Styling */
+/* Add/Remove Student Sections */
 .add-remove-student-section {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    flex-wrap: wrap;
     gap: 30px;
-    justify-content: center;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    padding: 30px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 40px;
 }
 
 .section-column {
-    flex: 1; /* Each column takes equal space */
-    min-width: 280px; /* Minimum width before wrapping */
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    text-align: center;
+    flex: 1; /* Each column takes equal width */
+    min-width: 300px; /* Minimum width before wrapping */
+    background-color: #fdfdfd;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eee;
 }
 
 .section-column h3 {
-    margin-top: 0;
     font-size: 1.4em;
     color: #34495e;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
     padding-bottom: 10px;
-    margin-bottom: 20px;
 }
 
 .section-column .input-group {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.section-column .action-button {
-    width: 80%; /* Make buttons take more width */
-    max-width: 250px; /* Limit max width */
+.section-column input[type="text"] {
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    width: 100%; /* Full width within its column */
+    box-sizing: border-box; /* Include padding and border in element's total width */
+}
+
+/* Info and Warning Text */
+.info-text {
+    font-size: 0.95em;
+    color: #7f8c8d;
+    margin-top: 15px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .warning-text {
-    color: #dc3545; /* Red color for warnings */
-    font-weight: bold;
+    font-size: 0.95em;
+    color: #e74c3c;
+    font-weight: 500;
     margin-bottom: 15px;
-    font-size: 0.9em;
+    border: 1px dashed #e74c3c;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #fef0ef;
+}
+
+.info-icon {
+    color: #3498db;
+}
+
+/* How to Use Section */
+.how-to-use-section {
+    background-color: #f0f8ff; /* Light blue background */
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 40px;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.how-to-use-section h2 {
+    color: #2980b9;
+    text-align: center;
+    border-bottom: 2px solid #aaddff;
+    margin-bottom: 30px;
+}
+
+.use-instructions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.instruction-step {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.instruction-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.instruction-step h3 {
+    color: #34495e;
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.instruction-step p {
+    font-size: 0.95em;
+    color: #666;
 }
 
 
-/* --- Responsive Adjustments --- */
+/* Footer */
+.system-footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2c3e50;
+    color: #bdc3c7;
+    font-size: 0.9em;
+    margin-top: 30px;
+}
+
+.system-footer p {
+    margin: 5px 0;
+}
+
+/* Utility / SR-Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
+    .header-brand {
+        justify-content: center; /* Center brand on small screens */
+        width: 100%;
+    }
+
+    .brand-title {
+        font-size: 1.5em;
+    }
+
+    .menu-toggle {
+        display: block; /* Show menu toggle button */
+        position: absolute;
+        right: 20px;
+    }
+
+    header {
+        flex-wrap: wrap; /* Allow header items to wrap */
+        padding: 10px 15px;
+    }
+
+    .dropdown-panel {
+        display: none; /* Hidden by default */
+        width: 100%;
+        background-color: #34495e;
+        position: absolute;
+        top: 70px; /* Below header */
+        left: 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 10px 0;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dropdown-panel.show {
+        display: flex; /* Show when 'show' class is added by JS */
+    }
+
+    .dropdown-panel a {
+        color: #ecf0f1;
+        text-decoration: none;
+        padding: 10px 20px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: background-color 0.2s ease;
+    }
+
+    .dropdown-panel a:hover {
+        background-color: #2c3e50;
+    }
+
     .container {
-        padding: 25px;
-        margin: 20px auto;
+        margin: 10px;
+        padding: 15px;
     }
 
-    h1 {
-        font-size: 2.2em;
+    .hero-title {
+        font-size: 2em;
     }
 
-    h2 {
-        font-size: 1.7em;
+    .hero-subtitle {
+        font-size: 1em;
+    }
+
+    .feature-buttons {
+        flex-direction: column;
+        align-items: center;
     }
 
     .section-button {
-        padding: 25px 30px;
-        min-width: 180px;
-        font-size: 1.1em;
+        max-width: 90%; /* Take more width on small screens */
+        padding: 20px;
     }
 
-    .section-button .icon {
-        font-size: 3em;
+    .class-selection {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .class-button, .class-button-monitor, .action-button {
-        font-size: 1em;
-        padding: 12px 20px;
-        min-width: unset;
+    .class-button, .class-button-monitor {
+        width: 90%;
+        box-sizing: border-box;
     }
 
-    input[type="date"], input[type="text"], input[type="password"] {
-        width: 95%; /* Take more width on small screens */
-        max-width: unset;
+    .date-selection-section .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-selection-section input[type="date"],
+    .action-button {
+        width: 100%;
+        box-sizing: border-box;
+        max-width: none; /* Remove max-width on smaller screens */
+    }
+
+    .data-table {
+        min-width: unset; /* Allow table to shrink */
     }
 
     .data-table th, .data-table td {
         padding: 10px;
-        font-size: 0.85em;
     }
 
-    .header-logo {
-        height: 50px; /* Smaller logo on mobile */
-    }
-    .brand-title {
-        font-size: 1.8rem; /* Smaller title on mobile */
+    .monitor-attendance-status {
+        flex-direction: column; /* Stack radio buttons */
+        gap: 5px;
+        align-items: flex-start;
     }
 
-    /* Responsive for new add/remove student section */
+    .monitor-attendance-status label {
+        width: 100%; /* Make labels full width */
+        text-align: center;
+    }
+
     .add-remove-student-section {
-        flex-direction: column; /* Stack columns vertically on smaller screens */
-        padding: 20px;
+        flex-direction: column;
     }
     .section-column {
-        width: 100%; /* Full width for columns */
         min-width: unset;
+        width: 100%;
+    }
+
+    .how-to-use-section h2 {
+        font-size: 1.8em;
+    }
+    .use-instructions {
+        grid-template-columns: 1fr; /* Single column layout */
     }
 }
 
+/* Even smaller screens (e.g., mobile landscape) */
 @media (max-width: 480px) {
-    h1 {
+    .header-logo {
+        height: 40px;
+        margin-right: 10px;
+    }
+    .brand-title {
+        font-size: 1.3em;
+    }
+    .menu-toggle {
+        font-size: 1.5em;
+    }
+    .hero-title {
         font-size: 1.8em;
     }
-    h2 {
-        font-size: 1.4em;
+    .hero-subtitle {
+        font-size: 0.9em;
     }
-    .main-sections {
-        flex-direction: column; /* Stack buttons vertically */
+    .section-button .icon {
+        font-size: 2.5em;
     }
-    .section-button {
-        width: 100%;
-        min-width: unset;
+    .section-button .button-text {
+        font-size: 1.3em;
     }
-    .class-selection {
-        flex-direction: column; /* Stack class buttons vertically */
-        gap: 10px;
+    .section-button .button-description {
+        font-size: 0.8em;
     }
-    .class-button, .class-button-monitor {
-        width: 100%;
+    .action-button {
+        padding: 10px 20px;
+        font-size: 1em;
     }
-    .monitor-attendance-status {
-        flex-direction: column; /* Stack radio buttons vertically */
-        align-items: flex-start;
+    .data-table th, .data-table td {
+        font-size: 0.85em;
+    }
+    .monitor-attendance-status label {
+        font-size: 0.85em;
+        padding: 6px 10px;
+    }
+    .remove-student-btn {
+        padding: 6px 8px;
+        font-size: 0.8em;
     }
 }
