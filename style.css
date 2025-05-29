@@ -89,7 +89,7 @@ h3 {
     border: 0;
 }
 
-/* --- Caring Heart Header Styles (NEW) --- */
+/* --- Caring Heart Header Styles --- */
 :root {
     --primary-blue: #007bff;
     --primary-red: #dc3545;
@@ -128,8 +128,7 @@ header {
     margin-bottom: 0; /* Override default h1 margin */
 }
 
-/* .header-buttons is now removed from HTML, so these styles are less relevant */
-/* However, .btn styles are reused by the modal buttons, so they are kept */
+/* General button styles (used by modal buttons now) */
 .btn {
     padding: 0.6rem 1.4rem;
     border: none;
@@ -146,12 +145,12 @@ header {
     gap: 0.5rem;
 }
 
-.btn-login { /* These specific color styles are for modal buttons now */
+.btn-login { /* Used by 'Cancel' button in modal if it has this class */
     background-color: var(--primary-red);
     color: white;
 }
 
-.btn-register { /* These specific color styles are for modal buttons now */
+.btn-register { /* Used by 'Submit' button in modal if it has this class */
     background-color: var(--primary-blue);
     color: white;
 }
@@ -165,7 +164,7 @@ header {
 }
 
 .menu-toggle {
-    display: none; /* Hidden by default on desktop */
+    display: none; /* Hidden by default on desktop, shown on mobile */
     font-size: 1.8rem;
     background: none;
     border: none;
@@ -209,13 +208,10 @@ header {
 }
 
 @media (max-width: 768px) {
-    /* .header-buttons is now removed entirely from HTML, so these are redundant */
-    /* .header-buttons {
-        display: none;
-    } */
+    /* .header-buttons was removed from HTML */
 
     .menu-toggle {
-        display: block; /* Show menu toggle button */
+        display: block; /* Show menu toggle button on smaller screens */
     }
 
     .dropdown-panel.show {
